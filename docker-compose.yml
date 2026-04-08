@@ -1,25 +1,71 @@
+version: '3.8'
+
 services:
-	db:
-		image: postgres:16
-		restart: always
-		environment:
-			POSTGRES_USER: myuser
-			POSTGRES_PASSWORD: mypassword
-			POSTGRES_DB: mydatabase
-		ports:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: tppuser
+      POSTGRES_PASSWORD: tppdev123
+      POSTGRES_DB: themeparkplanner
+    ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tppuser -d themeparkplanner"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
-    image: redis:latest
+    image: redis:7-alpine
     container_name: redis-server
     ports:
       - "6379:6379"
     restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-	server:
-    build: ./backend
+  api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: themeparkplanner-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://tppuser:tppdev123@db:5432/themeparkplanner
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - ENVIRONMENT=development
+      - DEBUG=true
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: always
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-	client:
-    build: ./frontend
+  # Uncomment when frontend is ready
+  # client:
+  #   build: ./frontend
+  #   container_name: themeparkplanner-frontend
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - api
+  #   restart: always
+
+volumes:
+  pgdata:
+  redisdata:
