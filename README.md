@@ -16,22 +16,39 @@ themeparkplanner/
 │   │   └── llm/           # LLM integration for intelligent planning
 │   ├── alembic/           # Database migrations
 │   ├── requirements.txt   # Python dependencies
-│   └── Dockerfile         # Container configuration
+│   └── Dockerfile         # Backend container configuration
+├── frontend/               # Next.js frontend application
+│   ├── src/               # Source code
+│   │   ├── app/           # App Router pages and layouts
+│   │   └── components/    # Reusable React components
+│   ├── public/           # Static assets
+│   ├── package.json      # Node.js dependencies
+│   └── Dockerfile        # Frontend container configuration
+├── docker-compose.yml     # Multi-service orchestration
+├── .gitignore            # Git exclusions
 └── README.md
 ```
 
-## Backend API
+## Tech Stack
 
-The backend is built with FastAPI and provides a robust, async API with the following features:
-
-### Tech Stack
-
+### Backend (FastAPI)
 - **FastAPI**: Modern, fast web framework for building APIs
 - **SQLAlchemy**: Async ORM for PostgreSQL database operations
 - **PostgreSQL**: Primary database for application data
 - **Redis**: Caching and session management
 - **Pydantic**: Data validation and settings management
 - **Alembic**: Database migration management
+
+### Frontend (Next.js)
+- **Next.js 16**: React framework with App Router
+- **React 19**: UI library for building user interfaces
+- **TypeScript**: Type-safe JavaScript development
+- **Tailwind CSS**: Utility-first CSS framework
+- **ESLint**: Code linting and formatting
+
+### Infrastructure
+- **Docker**: Containerization for all services
+- **Docker Compose**: Multi-container orchestration
 
 ### Key Features
 
@@ -48,62 +65,94 @@ The backend is built with FastAPI and provides a robust, async API with the foll
 
 ### Prerequisites
 
-- Python 3.9+
-- PostgreSQL 12+
-- Redis 6+
+- **Docker**: Latest version
+- **Docker Compose**: For orchestration
 
-### Backend Setup
+### Development Setup (Recommended)
 
-1. **Navigate to backend directory**
+1. **Clone the repository**
    ```bash
-   cd backend
+   git clone <repository-url>
+   cd themeparkplanner
    ```
 
-2. **Install dependencies**
+2. **Build and start all services**
    ```bash
-   pip install -r requirements.txt
+   docker-compose up --build
    ```
 
-3. **Set up environment variables**
-   Create a `.env` file in the backend directory:
-   ```env
-   DATABASE_URL=postgresql+asyncpg://user:password@localhost/themeparkplanner
-   REDIS_URL=redis://localhost:6379
-   SECRET_KEY=your-super-secret-key-here
-   ENVIRONMENT=development
-   DEBUG=true
-   ```
+   This will start:
+   - **Frontend**: http://localhost:3000
+   - **Backend API**: http://localhost:8000
+   - **API Documentation**: http://localhost:8000/docs
+   - **PostgreSQL**: localhost:5432
+   - **Redis**: localhost:6379
 
-4. **Run database migrations** (when available)
+3. **Verify services are running**
    ```bash
-   alembic upgrade head
+   docker-compose ps
    ```
 
-5. **Start the development server**
-   ```bash
-   uvicorn app.main:app --reload
-   ```
+### Alternative: Individual Service Setup
 
-The API will be available at:
-- **API**: http://localhost:8000
-- **Documentation**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/api/v1/health
-
-### Docker Setup (Alternative)
-
+#### Backend Only
 ```bash
 cd backend
 docker build -t themeparkplanner-api .
 docker run -p 8000:8000 themeparkplanner-api
 ```
 
+#### Frontend Only
+```bash
+cd frontend
+docker build -t themeparkplanner-frontend .
+docker run -p 3000:3000 themeparkplanner-frontend
+```
+
+## Docker Development
+
+### Useful Commands
+
+```bash
+# Start all services in background
+docker-compose up -d
+
+# View logs for all services
+docker-compose logs -f
+
+# View logs for specific service
+docker-compose logs -f frontend
+docker-compose logs -f api
+
+# Rebuild and restart services
+docker-compose up --build
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (database data)
+docker-compose down -v
+
+# Execute commands in running containers
+docker-compose exec api bash
+docker-compose exec frontend sh
+```
+
+### Environment Configuration
+
+The application uses environment variables for configuration. Default values are set in `docker-compose.yml`:
+
+- **Database**: PostgreSQL with user `tppuser` and database `themeparkplanner`
+- **Redis**: Standard Redis configuration with persistence
+- **API**: Development mode with hot reload enabled
+- **Frontend**: Production build with optimized assets
+
 ## API Endpoints
 
-### Health Checks
+### System
 
-- `GET /api/v1/health` - Overall system health
-- `GET /api/v1/health/database` - Database connectivity
-- `GET /api/v1/health/redis` - Redis connectivity
+- `GET /` - Welcome message and API information
+- `GET /docs` - Interactive API documentation (Swagger UI)
 
 ### Core API (Coming Soon)
 
@@ -114,47 +163,81 @@ docker run -p 8000:8000 themeparkplanner-api
 
 ## Development
 
-### Environment Configuration
+### Backend Development
 
-The application uses Pydantic Settings for configuration management. Key settings include:
+The backend uses FastAPI with async PostgreSQL and Redis integration:
 
-- **Database**: Connection URL, pool size, and overflow settings
-- **Redis**: Connection URL and pool configuration
-- **API**: Version prefix and project metadata
-- **Security**: Secret keys and token expiration
-- **Environment**: Development/production mode and debug settings
+- **Database Models**: Defined in `backend/app/models/` using SQLAlchemy async ORM
+- **API Routes**: Located in `backend/app/api/` with automatic OpenAPI documentation
+- **Business Logic**: Organized in `backend/app/services/` for maintainability
+- **Configuration**: Environment-based settings using Pydantic Settings
 
-### Database Models
+#### Adding New API Endpoints
 
-Database models are defined in `app/models/` using SQLAlchemy's async ORM. The base model class is configured in `app/core/database.py`.
+1. Create route handlers in `backend/app/api/`
+2. Define Pydantic schemas in `backend/app/schemas/`
+3. Add business logic to `backend/app/services/`
+4. Include routers in `backend/app/main.py`
 
-### Adding New Endpoints
+### Frontend Development
 
-1. Create route handlers in `app/api/`
-2. Define Pydantic schemas in `app/schemas/`
-3. Add business logic to `app/services/`
-4. Include routers in `app/main.py`
+The frontend is built with Next.js 16 using the App Router:
 
-## Production Deployment
+- **Pages**: Defined in `frontend/src/app/` using React Server Components
+- **Components**: Reusable UI components in `frontend/src/components/`
+- **Styling**: Tailwind CSS for utility-first styling
+- **Type Safety**: Full TypeScript integration
+
+#### Adding New Pages
+
+1. Create page components in `frontend/src/app/`
+2. Add reusable components to `frontend/src/components/`
+3. Configure routing using Next.js App Router conventions
 
 ### Environment Variables
 
-Set these environment variables for production:
+For development, environment variables are configured in `docker-compose.yml`. For local overrides, create:
 
-```env
-DATABASE_URL=postgresql+asyncpg://prod_user:prod_password@prod_host/prod_db
-REDIS_URL=redis://prod_redis_host:6379
-SECRET_KEY=production-secret-key-very-long-and-secure
-ENVIRONMENT=production
-DEBUG=false
-```
+- `backend/.env` - Backend-specific environment variables
+- `frontend/.env.local` - Frontend-specific environment variables
+
+## Production Deployment
+
+### Docker Production Setup
+
+1. **Create production docker-compose override**
+   ```yaml
+   # docker-compose.prod.yml
+   version: '3.8'
+   services:
+     api:
+       environment:
+         - ENVIRONMENT=production
+         - DEBUG=false
+         - SECRET_KEY=${PRODUCTION_SECRET_KEY}
+     client:
+       environment:
+         - NODE_ENV=production
+   ```
+
+2. **Set production environment variables**
+   ```env
+   DATABASE_URL=postgresql+asyncpg://prod_user:prod_password@prod_host/prod_db
+   REDIS_URL=redis://prod_redis_host:6379
+   PRODUCTION_SECRET_KEY=your-very-long-and-secure-production-secret-key
+   ```
+
+3. **Deploy with production configuration**
+   ```bash
+   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+   ```
 
 ### Performance Considerations
 
-- PostgreSQL connection pooling is configured for optimal performance
-- Redis is used for caching frequently accessed data
-- Async endpoints handle concurrent requests efficiently
-- Health checks ensure service reliability
+- **Backend**: Async PostgreSQL with connection pooling, Redis caching
+- **Frontend**: Next.js production build with static optimization
+- **Database**: Persistent volumes for data integrity
+- **Containers**: Optimized Docker images for reduced size and startup time
 
 ## Contributing
 
