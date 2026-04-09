@@ -56,15 +56,16 @@ services:
       - ./backend:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  # Uncomment when frontend is ready
-  # client:
-  #   build: ./frontend
-  #   container_name: themeparkplanner-frontend
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - api
-  #   restart: always
+  client:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: themeparkplanner-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: always
 
 volumes:
   pgdata:
