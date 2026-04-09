@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ApiError } from '@/lib/api-client';
 
 export interface UseApiState<T> {
@@ -26,11 +26,14 @@ export function useApi<T>(
     error: null,
   });
 
+  const apiCallRef = useRef(apiCall);
+  apiCallRef.current = apiCall;
+
   const execute = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
-      const result = await apiCall();
+      const result = await apiCallRef.current();
       setState({
         data: result,
         loading: false,
@@ -52,7 +55,7 @@ export function useApi<T>(
       });
       throw apiError;
     }
-  }, [apiCall]);
+  }, []);
 
   const reset = useCallback(() => {
     setState({
