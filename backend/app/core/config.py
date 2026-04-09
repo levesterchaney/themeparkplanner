@@ -4,7 +4,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # Database
-    database_url: str = "postgresql+asyncpg://user:password@localhost/themeparkplanner"
+    database_url: str = "postgresql+asyncpg://tppuser:tppdev123@localhost:5432/themeparkplanner"
     database_pool_size: int = 10
     database_max_overflow: int = 20
     

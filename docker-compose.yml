@@ -57,14 +57,12 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   client:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: themeparkplanner-frontend
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=production
     depends_on:
       - api
     restart: always
