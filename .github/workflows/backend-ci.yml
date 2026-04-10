@@ -70,9 +70,9 @@ jobs:
       working-directory: ./backend
       run: |
         cp .env.example .env
-        echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/themeparkplanner_test" >> .env
-        echo "REDIS_URL=redis://localhost:6379" >> .env
-        echo "DEBUG=true" >> .env
+        echo "\nDATABASE_URL=postgresql://postgres:postgres@localhost:5432/themeparkplanner_test" >> .env
+        echo "\nREDIS_URL=redis://localhost:6379" >> .env
+        echo "\nDEBUG=true" >> .env
     
     - name: Run database migrations
       working-directory: ./backend
