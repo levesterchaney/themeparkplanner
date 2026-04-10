@@ -1,9 +1,13 @@
+from unittest.mock import AsyncMock, Mock
+
+import pytest
 from httpx import AsyncClient
 
 
 class TestUserRegistration:
     """Test user registration endpoint."""
 
+    @pytest.mark.asyncio
     async def test_register_user_success(self, client: AsyncClient):
         """Test successful user registration."""
         user_data = {
@@ -23,25 +27,38 @@ class TestUserRegistration:
         # Check that session cookie is set
         assert "session_token" in response.cookies
 
-    async def test_register_user_duplicate_email(self, client: AsyncClient):
+    @pytest.mark.asyncio
+    async def test_register_user_duplicate_email(
+        self, mock_db_with_existing_user: AsyncMock
+    ):
         """Test registration with duplicate email fails."""
-        user_data = {
-            "email": "duplicate@example.com",
-            "password": "TestPassword123",
-            "firstName": "Test",
-        }
+        from httpx import AsyncClient
 
-        # Register first user
-        await client.post("/api/v1/auth/register", json=user_data)
+        from app.core.database import get_db
+        from app.main import app
 
-        # Try to register with same email
-        response = await client.post("/api/v1/auth/register", json=user_data)
+        async def override_get_db():
+            yield mock_db_with_existing_user
 
-        assert response.status_code == 409
-        data = response.json()
-        assert "error" in data
-        assert "email already exists" in data["error"].lower()
+        app.dependency_overrides[get_db] = override_get_db
 
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            user_data = {
+                "email": "duplicate@example.com",
+                "password": "TestPassword123",
+                "firstName": "Test",
+            }
+
+            response = await client.post("/api/v1/auth/register", json=user_data)
+
+            assert response.status_code == 409
+            data = response.json()
+            assert "error" in data
+            assert "email already exists" in data["error"].lower()
+
+        app.dependency_overrides.clear()
+
+    @pytest.mark.asyncio
     async def test_register_user_weak_password(self, client: AsyncClient):
         """Test registration with weak password fails."""
         user_data = {
@@ -61,28 +78,35 @@ class TestUserRegistration:
 class TestUserLogin:
     """Test user login endpoint."""
 
-    async def test_login_user_success(self, client: AsyncClient):
+    @pytest.mark.asyncio
+    async def test_login_user_success(self, mock_db_with_login_user: AsyncMock):
         """Test successful user login."""
-        # First register a user
-        register_data = {
-            "email": "login@example.com",
-            "password": "TestPassword123",
-            "firstName": "Login",
-        }
-        await client.post("/api/v1/auth/register", json=register_data)
+        from httpx import AsyncClient
 
-        # Now login
-        login_data = {"email": "login@example.com", "password": "TestPassword123"}
-        response = await client.post("/api/v1/auth/login", json=login_data)
+        from app.core.database import get_db
+        from app.main import app
 
-        assert response.status_code == 200
-        data = response.json()
-        assert data["message"] == "Login successful"
-        assert "user_id" in data
+        async def override_get_db():
+            yield mock_db_with_login_user
 
-        # Check that session cookie is set
-        assert "session_token" in response.cookies
+        app.dependency_overrides[get_db] = override_get_db
 
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            # Login with existing user
+            login_data = {"email": "login@example.com", "password": "TestPassword123"}
+            response = await client.post("/api/v1/auth/login", json=login_data)
+
+            assert response.status_code == 200
+            data = response.json()
+            assert data["message"] == "Login successful"
+            assert "user_id" in data
+
+            # Check that session cookie is set
+            assert "session_token" in response.cookies
+
+        app.dependency_overrides.clear()
+
+    @pytest.mark.asyncio
     async def test_login_user_invalid_email(self, client: AsyncClient):
         """Test login with non-existent email fails."""
         login_data = {"email": "nonexistent@example.com", "password": "TestPassword123"}
@@ -93,21 +117,195 @@ class TestUserLogin:
         assert "error" in data
         assert "invalid" in data["error"].lower()
 
-    async def test_login_user_invalid_password(self, client: AsyncClient):
+    @pytest.mark.asyncio
+    async def test_login_user_invalid_password(
+        self, mock_db_with_login_user: AsyncMock
+    ):
         """Test login with wrong password fails."""
-        # Register user first
-        register_data = {
-            "email": "wrongpass@example.com",
-            "password": "CorrectPassword123",
-            "firstName": "Test",
-        }
-        await client.post("/api/v1/auth/register", json=register_data)
+        from httpx import AsyncClient
 
-        # Try login with wrong password
-        login_data = {"email": "wrongpass@example.com", "password": "WrongPassword123"}
-        response = await client.post("/api/v1/auth/login", json=login_data)
+        from app.core.database import get_db
+        from app.main import app
 
+        async def override_get_db():
+            yield mock_db_with_login_user
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            # Try login with wrong password
+            login_data = {"email": "login@example.com", "password": "WrongPassword123"}
+            response = await client.post("/api/v1/auth/login", json=login_data)
+
+            assert response.status_code == 401
+            data = response.json()
+            assert "error" in data
+            assert "invalid" in data["error"].lower()
+
+        app.dependency_overrides.clear()
+
+
+class TestUserRegistrationErrorCases:
+    """Test user registration error cases."""
+
+    @pytest.mark.asyncio
+    async def test_register_user_database_error(self, mock_db: AsyncMock):
+        """Test registration when database operation fails."""
+        from httpx import AsyncClient
+
+        from app.core.database import get_db
+        from app.main import app
+
+        # Make commit operation fail
+        mock_db.commit.side_effect = Exception("Database error")
+
+        async def override_get_db():
+            yield mock_db
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            user_data = {
+                "firstName": "Test",
+                "email": "test@example.com",
+                "password": "TestPassword123",
+            }
+            response = await client.post("/api/v1/auth/register", json=user_data)
+
+            assert response.status_code == 422
+            data = response.json()
+            assert "error" in data
+            assert "creation failed" in data["error"].lower()
+
+        app.dependency_overrides.clear()
+
+
+class TestUserLogout:
+    """Test user logout endpoint."""
+
+    @pytest.mark.asyncio
+    async def test_logout_user_success(self, mock_db_with_login_user: AsyncMock):
+        from httpx import AsyncClient
+
+        from app.core.database import get_db
+        from app.main import app
+
+        async def override_get_db():
+            yield mock_db_with_login_user
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            # Login with existing user to get session token
+            login_data = {"email": "login@example.com", "password": "TestPassword123"}
+            login_response = await client.post("/api/v1/auth/login", json=login_data)
+            assert login_response.status_code == 200
+            assert "session_token" in login_response.cookies
+
+            # Get the session token for logout
+            session_token = login_response.cookies["session_token"]
+
+            # Logout with the session token
+            logout_response = await client.post(
+                "/api/v1/auth/logout", cookies={"session_token": session_token}
+            )
+            assert logout_response.status_code == 204
+
+        app.dependency_overrides.clear()
+
+    @pytest.mark.asyncio
+    async def test_logout_user_unauthorized(self, client: AsyncClient):
+        """Test logout without session token."""
+        response = await client.post("/api/v1/auth/logout")
         assert response.status_code == 401
         data = response.json()
         assert "error" in data
-        assert "invalid" in data["error"].lower()
+        assert "session token" in data["error"].lower()
+
+    @pytest.mark.asyncio
+    async def test_logout_user_invalid_session_token(self):
+        """Test logout with invalid session token."""
+        from httpx import AsyncClient
+
+        from app.core.database import get_db
+        from app.main import app
+
+        # Create mock that returns None for session lookup
+        mock_session = AsyncMock()
+        mock_result = Mock()
+        mock_result.scalar.return_value = None
+        mock_session.execute.return_value = mock_result
+
+        async def override_get_db():
+            yield mock_session
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            response = await client.post(
+                "/api/v1/auth/logout", cookies={"session_token": "invalid_token"}
+            )
+            assert response.status_code == 401
+            data = response.json()
+            assert "error" in data
+            assert "invalid session" in data["error"].lower()
+
+        app.dependency_overrides.clear()
+
+    @pytest.mark.asyncio
+    async def test_logout_user_database_error(self, mock_db_with_login_user: AsyncMock):
+        """Test logout when database operation fails."""
+        from httpx import AsyncClient
+
+        from app.core.database import get_db
+        from app.main import app
+
+        # Make delete operation fail
+        mock_db_with_login_user.delete.side_effect = Exception("Database error")
+
+        async def override_get_db():
+            yield mock_db_with_login_user
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            response = await client.post(
+                "/api/v1/auth/logout", cookies={"session_token": "test_session_token"}
+            )
+            assert response.status_code == 422
+            data = response.json()
+            assert "error" in data
+            assert "logout failed" in data["error"].lower()
+
+        app.dependency_overrides.clear()
+
+
+class TestUserLoginErrorCases:
+    """Test user login error cases."""
+
+    @pytest.mark.asyncio
+    async def test_login_user_database_error(self, mock_db_with_login_user: AsyncMock):
+        """Test login when database operation fails during session creation."""
+        from httpx import AsyncClient
+
+        from app.core.database import get_db
+        from app.main import app
+
+        # Make commit operation fail
+        mock_db_with_login_user.commit.side_effect = Exception("Database error")
+
+        async def override_get_db():
+            yield mock_db_with_login_user
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            login_data = {"email": "login@example.com", "password": "TestPassword123"}
+            response = await client.post("/api/v1/auth/login", json=login_data)
+
+            assert response.status_code == 422
+            data = response.json()
+            assert "error" in data
+            assert "login failed" in data["error"].lower()
+
+        app.dependency_overrides.clear()
