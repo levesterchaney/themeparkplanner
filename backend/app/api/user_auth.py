@@ -2,7 +2,7 @@ import bcrypt
 import secrets
 
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy import select
@@ -49,7 +49,9 @@ async def register_user(registration_data: UserRegistrationData, response: Respo
         return {"error": "Password must be at least 8 characters long"}
 
     existing_user = await db.execute(select(User).where(User.email == registration_data.email))
-    if existing_user.scalar() is not None:
+    user = existing_user.scalar()
+
+    if user is not None:
         response.status_code = status.HTTP_409_CONFLICT
         return {"error": "An account with this email already exists."}
 
@@ -104,8 +106,8 @@ async def login_user(login_data: UserLoginData, response: Response, db: AsyncSes
         401 Unauthorized if the email or password is incorrect
         422 if there are validation errors
     """
-    user_result = await db.execute(select(User).where(User.email == login_data.email))
-    user = user_result.scalar()
+    existing_user = await db.execute(select(User).where(User.email == login_data.email))
+    user = existing_user.scalar()
 
     if user is None or not bcrypt.checkpw(login_data.password.encode('utf-8'), user.password_hash.encode('utf-8')):
         response.status_code = status.HTTP_401_UNAUTHORIZED
@@ -128,3 +130,37 @@ async def login_user(login_data: UserLoginData, response: Response, db: AsyncSes
         return {"error": "User login failed"}
 
     return {"message": "Login successful", "user_id": user.id}
+
+
+@router.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout_user(request: Request, response: Response, db: AsyncSession = Depends(get_db)):
+    """
+    User logout endpoint.
+
+    Deletes the user's session based on the session token cookie. The session token is removed from the response cookies.
+
+    Returns:
+        204 No Content on successful logout
+        401 Unauthorized if the session token is missing or invalid
+    """
+    session_token = request.cookies.get("session_token")
+    if not session_token:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {"error": "No session token provided"}
+
+    session_result = await db.execute(select(Session).where(Session.token == session_token))
+    session = session_result.scalar()
+
+    if session is None:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {"error": "Invalid session token"}
+
+    try:
+        await db.delete(session)
+        await db.commit()
+        response.delete_cookie(key="session_token")
+    except Exception as e:
+        response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        return {"error": "User logout failed"}
+
+    return {"message": "Logout successful"}

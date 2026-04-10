@@ -105,8 +105,8 @@ docker run -p 8000:8000 themeparkplanner-api
 #### Frontend Only
 ```bash
 cd frontend
-docker build -t themeparkplanner-frontend .
-docker run -p 3000:3000 themeparkplanner-frontend
+docker build -t themeparkplanner-ui .
+docker run -p 3000:3000 themeparkplanner-ui
 ```
 
 ## Docker Development

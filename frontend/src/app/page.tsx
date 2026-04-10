@@ -1,6 +1,10 @@
+import {cookies} from 'next/headers';
 import HealthCheck from '@/components/HealthCheck';
 
-export default function Home() {
+export default async function Home() {
+  const cookieStore = await cookies();
+  const hasActiveSession = cookieStore.has('session_token');
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <main className="container mx-auto px-4 py-16">
@@ -56,15 +60,23 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-12 text-center">
-            <a className="text-gray-500 dark:text-gray-400" href="/login">
+          { hasActiveSession ?
+            <div className="mt-12 text-center">
+              <a className="text-gray-500 dark:text-gray-400" href="/logout">
+                Logout
+              </a>
+            </div>
+              :
+            <div className="mt-12 text-center">
+              <a className="text-gray-500 dark:text-gray-400" href="/login">
                 Sign in
-            </a>
-                &nbsp;|&nbsp;
-            <a className="text-gray-500 dark:text-gray-400" href="/register">
+              </a>
+                  &nbsp;|&nbsp;
+              <a className="text-gray-500 dark:text-gray-400" href="/register">
                 Register
-            </a>
-          </div>
+              </a>
+            </div>
+          }
         </div>
       </main>
     </div>
