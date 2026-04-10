@@ -114,6 +114,14 @@ jspm_packages/
 # Optional eslint cache
 .eslintcache
 
+# Pre-commit
+.pre-commit-cache/
+
+# Code formatting cache
+.black-cache/
+.isort.cfg
+.prettier-cache/
+
 # Microbundle cache
 .rpt2_cache/
 .rts2_cache_cjs/
