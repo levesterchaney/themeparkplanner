@@ -1,0 +1,87 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Development tools
+.pre-commit-cache/
+.black-cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+local.db
+
+# Logs
+*.log
+logs/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# CI/CD
+.github/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Development scripts and tools
+test_*.py
+*_test.py
+setup.py
+setup.cfg
+pyproject.toml

@@ -12,7 +12,8 @@ from alembic import context
 from app.core.database import Base
 
 # Import all models to ensure they are registered with Base.metadata
-from app.models import (  # noqa
+# These imports are needed for alembic autogenerate to work properly
+from app.models import (  # noqa: F401
     Attraction,
     ChatMessage,
     Itinerary,
@@ -97,20 +98,16 @@ def run_migrations_online() -> None:
     """
     url = get_database_url()
 
-    # configuration = {
-    #     "sqlalchemy.url": url,
-    # }
-
     connectable = create_async_engine(
         url,
         poolclass=pool.NullPool,
     )
 
     async def do_run_migrations() -> None:
-        async with connectable.begin() as connection:
-            await connection.run_sync(do_run_migrations_sync, connectable)
+        async with connectable.connect() as connection:
+            await connection.run_sync(do_run_migrations_sync)
 
-    def do_run_migrations_sync(connection, engine) -> None:
+    def do_run_migrations_sync(connection) -> None:
         context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
