@@ -70,7 +70,7 @@ jobs:
       working-directory: ./backend
       run: |
         cp .env.example .env
-        sed -i 's|DATABASE_URL=.*|DATABASE_URL=postgresql://postgres:postgres@localhost:5432/themeparkplanner_test|' .env
+        sed -i 's|DATABASE_URL=.*|DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/themeparkplanner_test|' .env
         sed -i 's|REDIS_URL=.*|REDIS_URL=redis://localhost:6379|' .env
         sed -i 's|DEBUG=.*|DEBUG=true|' .env
 
