@@ -57,8 +57,12 @@ export default function Home() {
           </div>
 
           <div className="mt-12 text-center">
-            <a className="text-gray-500 dark:text-gray-400" href="/auth/register">
-                Sign up now
+            <a className="text-gray-500 dark:text-gray-400" href="/login">
+                Sign in
+            </a>
+                &nbsp;|&nbsp;
+            <a className="text-gray-500 dark:text-gray-400" href="/register">
+                Register
             </a>
           </div>
         </div>

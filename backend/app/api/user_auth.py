@@ -23,6 +23,11 @@ class UserRegistrationData(BaseModel):
     lastName: Optional[str] = None
 
 
+class UserLoginData(BaseModel):
+    email: str
+    password: str
+
+
 @router.post("/auth/register", status_code=status.HTTP_201_CREATED)
 async def register_user(registration_data: UserRegistrationData, response: Response, db: AsyncSession = Depends(get_db)):
     """
@@ -84,3 +89,42 @@ async def register_user(registration_data: UserRegistrationData, response: Respo
         return {"error": "User creation failed"}
 
     return {"message": "User created successfully", "user_id": new_user.id}
+
+
+@router.post("/auth/login", status_code=status.HTTP_200_OK)
+async def login_user(login_data: UserLoginData, response: Response, db: AsyncSession = Depends(get_db)):
+    """
+    User login endpoint.
+
+    Creates a new session for the user if the provided email and password are correct. The password is verified
+    using passlib.
+
+    Returns:
+        200 OK on successful login
+        401 Unauthorized if the email or password is incorrect
+        422 if there are validation errors
+    """
+    user_result = await db.execute(select(User).where(User.email == login_data.email))
+    user = user_result.scalar()
+
+    if user is None or not bcrypt.checkpw(login_data.password.encode('utf-8'), user.password_hash.encode('utf-8')):
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {"error": "Invalid email or password"}
+
+    try:
+        # Create a new session for the user
+        user_session = Session(
+            user_id=user.id,
+            token=secrets.token_urlsafe(32),
+            expires_at=datetime.utcnow() + timedelta(days=SESSION_TIMEOUT_DAYS),
+        )
+        db.add(user_session)
+        await db.flush()
+
+        response.set_cookie(key="session_token", value=user_session.token, httponly=True, samesite="lax", secure=True)
+        await db.commit()
+    except Exception as e:
+        response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        return {"error": "User login failed"}
+
+    return {"message": "Login successful", "user_id": user.id}
