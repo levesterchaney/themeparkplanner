@@ -45,24 +45,34 @@ target_metadata = Base.metadata
 
 
 def get_database_url():
-    """Get database URL from environment or alembic.ini."""
-    # Priority: DATABASE_URL env var > alembic.ini
-    database_url = None
+    """Get database URL from application settings or environment variables."""
+    try:
+        # Try to use application settings first
+        from app.core.config import settings
 
-    # Check environment variable first
-    if os.getenv("DATABASE_URL"):
-        database_url = os.getenv("DATABASE_URL")
-    else:
-        # Fallback to alembic.ini
-        database_url = config.get_main_option("sqlalchemy.url")
+        return settings.database_connection_url
+    except ImportError:
+        # Fallback to environment variables and alembic.ini
+        database_url = None
 
-    # Ensure we use asyncpg for async migrations
-    if database_url and "postgresql+psycopg2" in database_url:
-        database_url = database_url.replace("postgresql+psycopg2", "postgresql+asyncpg")
-    elif database_url and "postgresql://" in database_url:
-        database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
+        # Check environment variable first
+        if os.getenv("DATABASE_URL"):
+            database_url = os.getenv("DATABASE_URL")
+        else:
+            # Fallback to alembic.ini
+            database_url = config.get_main_option("sqlalchemy.url")
 
-    return database_url
+        # Ensure we use asyncpg for async migrations
+        if database_url and "postgresql+psycopg2" in database_url:
+            database_url = database_url.replace(
+                "postgresql+psycopg2", "postgresql+asyncpg"
+            )
+        elif database_url and "postgresql://" in database_url:
+            database_url = database_url.replace(
+                "postgresql://", "postgresql+asyncpg://"
+            )
+
+        return database_url
 
 
 def run_migrations_offline() -> None:

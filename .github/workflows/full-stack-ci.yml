@@ -61,7 +61,9 @@ jobs:
       working-directory: ./backend
       run: |
         cp .env.example .env
-        sed -i 's|DATABASE_URL=.*|DATABASE_URL=postgresql://postgres:postgres@localhost:5432/themeparkplanner_test|' .env
+        sed -i 's|DB_USER=.*|DB_USER=tppciuser|' .env
+        sed -i 's|DB_PASSWORD=.*|DB_PASSWORD=tppci123|' .env
+        sed -i 's|DB_NAME=.*|DB_NAME=themeparkplanner-ci_test|' .env
         sed -i 's|REDIS_URL=.*|REDIS_URL=redis://localhost:6379|' .env
         sed -i 's|DEBUG=.*|DEBUG=true|' .env
 
@@ -171,7 +173,9 @@ jobs:
       working-directory: ./backend
       run: |
         cp .env.example .env
-        sed -i 's|DATABASE_URL=.*|DATABASE_URL=postgresql://postgres:postgres@localhost:5432/themeparkplanner_test|' .env
+        sed -i 's|DB_USER=.*|DB_USER=tppciuser|' .env
+        sed -i 's|DB_PASSWORD=.*|DB_PASSWORD=tppci123|' .env
+        sed -i 's|DB_NAME=.*|DB_NAME=themeparkplanner-ci_test|' .env
         sed -i 's|REDIS_URL=.*|REDIS_URL=redis://localhost:6379|' .env
         sed -i 's|DEBUG=.*|DEBUG=true|' .env
 
