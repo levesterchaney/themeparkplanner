@@ -61,9 +61,9 @@ jobs:
       working-directory: ./backend
       run: |
         cp .env.example .env
-        echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/themeparkplanner_test" >> .env
-        echo "REDIS_URL=redis://localhost:6379" >> .env
-        echo "DEBUG=true" >> .env
+        sed -i 's|DATABASE_URL=.*|DATABASE_URL=postgresql://postgres:postgres@localhost:5432/themeparkplanner_test|' .env
+        sed -i 's|REDIS_URL=.*|REDIS_URL=redis://localhost:6379|' .env
+        sed -i 's|DEBUG=.*|DEBUG=true|' .env
     
     - name: Run database migrations
       working-directory: ./backend
@@ -171,15 +171,15 @@ jobs:
       working-directory: ./backend
       run: |
         cp .env.example .env
-        echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/themeparkplanner" >> .env
-        echo "REDIS_URL=redis://localhost:6379" >> .env
-        echo "DEBUG=true" >> .env
+        sed -i 's|DATABASE_URL=.*|DATABASE_URL=postgresql://postgres:postgres@localhost:5432/themeparkplanner_test|' .env
+        sed -i 's|REDIS_URL=.*|REDIS_URL=redis://localhost:6379|' .env
+        sed -i 's|DEBUG=.*|DEBUG=true|' .env
     
     - name: Set up frontend environment
       working-directory: ./frontend
       run: |
         cp .env.example .env.local
-        echo "NEXT_PUBLIC_API_BASE_URL=http://localhost:8000" >> .env.local
+        sed -i 's|NEXT_PUBLIC_API_BASE_URL=.*|NEXT_PUBLIC_API_BASE_URL=http://localhost:8000|' >> .env.local
     
     - name: Run database migrations
       working-directory: ./backend
