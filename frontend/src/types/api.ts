@@ -18,3 +18,11 @@ export interface HealthStatus {
   redis?: 'healthy' | 'unhealthy' | 'unknown';
   error?: string;
 }
+
+export interface RegistrationData {
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+}
+

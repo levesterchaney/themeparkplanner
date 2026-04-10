@@ -55,6 +55,12 @@ export default function Home() {
               API Base URL: {process.env.NEXT_PUBLIC_API_BASE_URL || 'Not configured'}
             </p>
           </div>
+
+          <div className="mt-12 text-center">
+            <a className="text-gray-500 dark:text-gray-400" href="/auth/register">
+                Sign up now
+            </a>
+          </div>
         </div>
       </main>
     </div>

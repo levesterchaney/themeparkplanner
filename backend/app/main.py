@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from .api.health import router as health_router
+from .api.user_auth import router as auth_router
 from .core.config import settings
 from .core.redis import redis_client
 
@@ -35,6 +36,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(health_router, prefix=settings.api_v1_str, tags=["health"])
+app.include_router(auth_router, prefix=settings.api_v1_str, tags=["auth"])
 
 
 @app.get("/")
