@@ -163,36 +163,73 @@ The application uses environment variables for configuration. Default values are
 
 ## Development
 
-### Backend Development
+For detailed development information, see the individual README files:
 
-The backend uses FastAPI with async PostgreSQL and Redis integration:
+- 📖 **[Backend Documentation](./backend/README.md)** - FastAPI setup, API documentation, testing, and deployment
+- 📖 **[Frontend Documentation](./frontend/README.md)** - Next.js setup, component architecture, styling, and testing
 
-- **Database Models**: Defined in `backend/app/models/` using SQLAlchemy async ORM
-- **API Routes**: Located in `backend/app/api/` with automatic OpenAPI documentation
-- **Business Logic**: Organized in `backend/app/services/` for maintainability
-- **Configuration**: Environment-based settings using Pydantic Settings
+### Quick Development Overview
 
-#### Adding New API Endpoints
+**Backend Development**
+- FastAPI with async PostgreSQL and Redis integration
+- Database models with SQLAlchemy async ORM
+- API routes with automatic OpenAPI documentation
+- Comprehensive testing with pytest
+- Database migrations with Alembic
 
-1. Create route handlers in `backend/app/api/`
-2. Define Pydantic schemas in `backend/app/schemas/`
-3. Add business logic to `backend/app/services/`
-4. Include routers in `backend/app/main.py`
+**Frontend Development**
+- Next.js 15 with App Router and React 19
+- TypeScript for type safety
+- Tailwind CSS for styling
+- Component testing with Jest + React Testing Library
+- Responsive design with dark mode support
 
-### Frontend Development
+### Local Development (Without Docker)
 
-The frontend is built with Next.js 16 using the App Router:
+**Backend Setup:**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+alembic upgrade head
+uvicorn app.main:app --reload
+```
 
-- **Pages**: Defined in `frontend/src/app/` using React Server Components
-- **Components**: Reusable UI components in `frontend/src/components/`
-- **Styling**: Tailwind CSS for utility-first styling
-- **Type Safety**: Full TypeScript integration
+**Frontend Setup:**
+```bash
+cd frontend
+npm install
+cp .env.example .env.local
+npm run dev
+```
 
-#### Adding New Pages
+### Testing
 
-1. Create page components in `frontend/src/app/`
-2. Add reusable components to `frontend/src/components/`
-3. Configure routing using Next.js App Router conventions
+**Backend Tests:**
+```bash
+cd backend
+pytest --cov=app --cov-report=html
+./run_tests.sh coverage
+```
+
+**Frontend Tests:**
+```bash
+cd frontend
+npm run test:coverage
+./run_tests.sh coverage
+```
+
+### Continuous Integration
+
+The project includes GitHub Actions workflows for automated testing:
+
+- **Backend CI**: Runs on non-main branches with backend changes
+- **Frontend CI**: Runs on non-main branches with frontend changes  
+- **Full Stack CI**: Runs on main branch for complete integration testing
+
+See [`.github/workflows/README.md`](./.github/workflows/README.md) for detailed CI/CD documentation.
 
 ### Environment Variables
 
