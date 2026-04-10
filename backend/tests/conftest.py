@@ -9,7 +9,7 @@ from app.core.database import Base, get_db
 from app.main import app
 
 # Test database URL - use separate test database
-TEST_DATABASE_URL = settings.database_url.replace(
+TEST_DATABASE_URL = settings.database_connection_url.replace(
     "/themeparkplanner", "/themeparkplanner_test"
 )
 

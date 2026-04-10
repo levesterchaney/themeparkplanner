@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import computed_field
 from pydantic_settings import BaseSettings
 
@@ -12,7 +14,7 @@ class Settings(BaseSettings):
     db_name: str = "themeparkplanner"
 
     # Alternative: allow override with full DATABASE_URL
-    database_url: str | None = None
+    database_url: Optional[str] = None
 
     database_pool_size: int = 10
     database_max_overflow: int = 20
