@@ -1,6 +1,8 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
+
 from .api.health import router as health_router
 from .api.user_auth import router as auth_router
 from .core.config import settings
@@ -19,7 +21,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.project_name,
     openapi_url=f"{settings.api_v1_str}/openapi.json",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Configure CORS
@@ -45,5 +47,5 @@ async def root():
     return {
         "message": "Welcome to Theme Park Planner API",
         "version": "1.0.0",
-        "docs": "/docs"
+        "docs": "/docs",
     }

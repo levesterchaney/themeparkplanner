@@ -1,6 +1,18 @@
-from app.core.database import Base
-from sqlalchemy import Column, Integer, String, Text, DateTime, Numeric, Boolean, JSON, ForeignKey, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.sql import func
+
+from app.core.database import Base
 
 
 class Park(Base):
@@ -12,17 +24,19 @@ class Park(Base):
     slug = Column(String(80), unique=True, nullable=False)
     resort_name = Column(String(255))
     timezone = Column(String(255), nullable=False)
-    location_lat = Column(Numeric(9,6))
-    location_lon = Column(Numeric(9,6))
+    location_lat = Column(Numeric(9, 6))
+    location_lon = Column(Numeric(9, 6))
     description = Column(Text)
     synced_at = Column(DateTime(timezone=True))
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
 
 class Attraction(Base):
     __tablename__ = "attractions"
     __table_args__ = (
-        UniqueConstraint('park_id', 'external_id', name='uix_park_attraction'),
+        UniqueConstraint("park_id", "external_id", name="uix_park_attraction"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
@@ -35,8 +49,10 @@ class Attraction(Base):
     avg_duration_min = Column(Integer)
     thrill_level = Column(String(50))
     kid_friendly = Column(Boolean, default=True)
-    location_lat = Column(Numeric(9,6))
-    location_lon = Column(Numeric(9,6))
+    location_lat = Column(Numeric(9, 6))
+    location_lon = Column(Numeric(9, 6))
     attraction_metadata = Column(JSON)
     synced_at = Column(DateTime(timezone=True))
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )

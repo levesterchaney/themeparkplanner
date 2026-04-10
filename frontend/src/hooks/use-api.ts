@@ -27,11 +27,14 @@ export function useApi<T>(
   });
 
   const apiCallRef = useRef(apiCall);
-  apiCallRef.current = apiCall;
+
+  useEffect(() => {
+    apiCallRef.current = apiCall;
+  }, [apiCall]);
 
   const execute = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    
+    setState((prev) => ({ ...prev, loading: true, error: null }));
+
     try {
       const result = await apiCallRef.current();
       setState({
@@ -41,13 +44,14 @@ export function useApi<T>(
       });
       return result;
     } catch (error) {
-      const apiError = error instanceof ApiError 
-        ? error 
-        : new ApiError({ 
-            message: error instanceof Error ? error.message : 'Unknown error', 
-            status: 0 
-          });
-      
+      const apiError =
+        error instanceof ApiError
+          ? error
+          : new ApiError({
+              message: error instanceof Error ? error.message : 'Unknown error',
+              status: 0,
+            });
+
       setState({
         data: null,
         loading: false,
@@ -67,9 +71,37 @@ export function useApi<T>(
 
   useEffect(() => {
     if (options.immediate) {
-      execute();
+      const runImmediate = async () => {
+        setState((prev) => ({ ...prev, loading: true, error: null }));
+
+        try {
+          const result = await apiCallRef.current();
+          setState({
+            data: result,
+            loading: false,
+            error: null,
+          });
+        } catch (error) {
+          const apiError =
+            error instanceof ApiError
+              ? error
+              : new ApiError({
+                  message:
+                    error instanceof Error ? error.message : 'Unknown error',
+                  status: 0,
+                });
+
+          setState({
+            data: null,
+            loading: false,
+            error: apiError,
+          });
+        }
+      };
+
+      runImmediate();
     }
-  }, [execute, options.immediate]);
+  }, [options.immediate]);
 
   return {
     ...state,

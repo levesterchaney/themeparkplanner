@@ -1,4 +1,4 @@
-import {cookies} from 'next/headers';
+import { cookies } from 'next/headers';
 import HealthCheck from '@/components/HealthCheck';
 
 export default async function Home() {
@@ -13,10 +13,11 @@ export default async function Home() {
             Theme Park Planner
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-            Plan your perfect theme park adventure with real-time data and intelligent recommendations
+            Plan your perfect theme park adventure with real-time data and
+            intelligent recommendations
           </p>
         </div>
-        
+
         <div className="max-w-4xl mx-auto">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
             <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">
@@ -24,7 +25,7 @@ export default async function Home() {
             </h2>
             <HealthCheck />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
@@ -34,7 +35,7 @@ export default async function Home() {
                 Browse theme parks and attractions
               </p>
             </div>
-            
+
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
                 🎢 Attractions
@@ -43,7 +44,7 @@ export default async function Home() {
                 Check real-time wait times and plan your route
               </p>
             </div>
-            
+
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
                 📋 Itineraries
@@ -53,30 +54,31 @@ export default async function Home() {
               </p>
             </div>
           </div>
-          
+
           <div className="mt-12 text-center">
             <p className="text-gray-500 dark:text-gray-400">
-              API Base URL: {process.env.NEXT_PUBLIC_API_BASE_URL || 'Not configured'}
+              API Base URL:{' '}
+              {process.env.NEXT_PUBLIC_API_BASE_URL || 'Not configured'}
             </p>
           </div>
 
-          { hasActiveSession ?
+          {hasActiveSession ? (
             <div className="mt-12 text-center">
               <a className="text-gray-500 dark:text-gray-400" href="/logout">
                 Logout
               </a>
             </div>
-              :
+          ) : (
             <div className="mt-12 text-center">
               <a className="text-gray-500 dark:text-gray-400" href="/login">
                 Sign in
               </a>
-                  &nbsp;|&nbsp;
+              &nbsp;|&nbsp;
               <a className="text-gray-500 dark:text-gray-400" href="/register">
                 Register
               </a>
             </div>
-          }
+          )}
         </div>
       </main>
     </div>

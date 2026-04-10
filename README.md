@@ -226,7 +226,7 @@ npm run test:coverage
 The project includes GitHub Actions workflows for automated testing:
 
 - **Backend CI**: Runs on non-main branches with backend changes
-- **Frontend CI**: Runs on non-main branches with frontend changes  
+- **Frontend CI**: Runs on non-main branches with frontend changes
 - **Full Stack CI**: Runs on main branch for complete integration testing
 
 See [`.github/workflows/README.md`](./.github/workflows/README.md) for detailed CI/CD documentation.

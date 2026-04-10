@@ -148,7 +148,7 @@ export default function RegistrationForm() {
   // Form validation, submission, error handling
 }
 
-// src/components/auth/LoginForm.tsx  
+// src/components/auth/LoginForm.tsx
 export default function LoginForm() {
   // Login flow, session management
 }
@@ -176,7 +176,7 @@ export default function HealthCheck() {
 // src/lib/api-client.ts
 class ApiClient {
   private baseURL: string;
-  
+
   async post<T>(endpoint: string, data?: any): Promise<T> {
     // HTTP client with error handling
   }
@@ -192,11 +192,11 @@ export const authService = {
   register: async (data: RegistrationData) => {
     return apiClient.post('/api/v1/auth/register', data);
   },
-  
+
   login: async (email: string, password: string) => {
     return apiClient.post('/api/v1/auth/login', { email, password });
   },
-  
+
   logout: async () => {
     return apiClient.post('/api/v1/auth/logout');
   }
@@ -261,10 +261,10 @@ import RegistrationForm from '@/components/auth/RegistrationForm';
 describe('RegistrationForm', () => {
   test('validates required fields', async () => {
     render(<RegistrationForm />);
-    
+
     const submitButton = screen.getByRole('button', { name: /register/i });
     fireEvent.click(submitButton);
-    
+
     expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
   });
 });
@@ -277,9 +277,9 @@ import { authService } from '@/services/auth';
 describe('AuthService', () => {
   test('calls registration endpoint', async () => {
     const userData = { email: 'test@example.com', password: 'password123' };
-    
+
     await authService.register(userData);
-    
+
     expect(mockApiClient.post).toHaveBeenCalledWith('/api/v1/auth/register', userData);
   });
 });
@@ -393,11 +393,11 @@ const nextConfig = {
   experimental: {
     // Enable latest Next.js features
   },
-  
+
   images: {
     domains: ['example.com'], // External image domains
   },
-  
+
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
@@ -473,7 +473,7 @@ const securityHeaders = [
     value: 'DENY'
   },
   {
-    key: 'X-Content-Type-Options', 
+    key: 'X-Content-Type-Options',
     value: 'nosniff'
   }
 ];
@@ -554,7 +554,7 @@ export default function ExampleForm() {
     event.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
       // API call here
       router.push('/success');
@@ -570,7 +570,7 @@ export default function ExampleForm() {
       {error && (
         <div className="text-red-600 text-sm">{error}</div>
       )}
-      
+
       <button
         type="submit"
         disabled={loading}
@@ -591,7 +591,7 @@ export const exampleService = {
   async getData(id: string) {
     return apiClient.get<DataResponse>(`/api/v1/data/${id}`);
   },
-  
+
   async createData(data: CreateDataRequest) {
     return apiClient.post<DataResponse>('/api/v1/data', data);
   }

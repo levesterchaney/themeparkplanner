@@ -37,7 +37,7 @@ backend/
 
 ## 📋 Prerequisites
 
-- Python 3.9+ 
+- Python 3.9+
 - PostgreSQL 12+
 - Redis 6+
 - pip or pipenv
@@ -71,7 +71,7 @@ DATABASE_MAX_OVERFLOW=10
 # Redis
 REDIS_URL=redis://localhost:6379
 
-# Application  
+# Application
 DEBUG=true
 PROJECT_NAME="Theme Park Planner API"
 API_V1_STR="/api/v1"
@@ -129,7 +129,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 2. **Login**: `POST /api/v1/auth/login`
    ```json
    {
-     "email": "user@example.com", 
+     "email": "user@example.com",
      "password": "SecurePassword123"
    }
    ```
@@ -205,7 +205,7 @@ tests/
 # Format code
 black app tests
 
-# Sort imports  
+# Sort imports
 isort app tests
 
 # Type checking
@@ -280,7 +280,7 @@ app.add_middleware(
 
 ### Health Checks
 - **Database**: Connection and query test
-- **Redis**: Connection and ping test  
+- **Redis**: Connection and ping test
 - **System**: Overall application status
 
 ### Logging
@@ -357,7 +357,7 @@ curl -X POST "http://localhost:8000/api/v1/auth/register" \
      -H "Content-Type: application/json" \
      -d '{
        "email": "john@example.com",
-       "password": "SecurePassword123", 
+       "password": "SecurePassword123",
        "firstName": "John",
        "lastName": "Doe"
      }'
@@ -374,7 +374,7 @@ curl -X POST "http://localhost:8000/api/v1/auth/login" \
      }'
 ```
 
-### Health Check  
+### Health Check
 ```bash
 curl -X GET "http://localhost:8000/api/v1/health"
 ```
@@ -392,7 +392,7 @@ pg_isready -h localhost -p 5432
 echo $DATABASE_URL
 ```
 
-**Redis Connection Error**  
+**Redis Connection Error**
 ```bash
 # Check Redis is running
 redis-cli ping
@@ -421,7 +421,7 @@ DEBUG=true uvicorn app.main:app --reload
 
 ### Key Metrics
 - Response time per endpoint
-- Database query performance  
+- Database query performance
 - Memory usage
 - Active sessions
 
@@ -435,7 +435,7 @@ DEBUG=true uvicorn app.main:app --reload
 
 ### Current Features ✅
 - User authentication system
-- Database migrations  
+- Database migrations
 - Health monitoring
 - Comprehensive testing
 - API documentation

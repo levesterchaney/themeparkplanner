@@ -15,7 +15,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:15
@@ -29,7 +29,7 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
         image: redis:7
         options: >-
@@ -39,19 +39,19 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-    
+
     strategy:
       matrix:
         python-version: ['3.9', '3.10', '3.11']
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Cache pip dependencies
       uses: actions/cache@v3
       with:
@@ -59,13 +59,13 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-    
+
     - name: Install dependencies
       working-directory: ./backend
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
+
     - name: Set up environment variables
       working-directory: ./backend
       run: |
@@ -73,17 +73,27 @@ jobs:
         sed -i 's|DATABASE_URL=.*|DATABASE_URL=postgresql://postgres:postgres@localhost:5432/themeparkplanner_test|' .env
         sed -i 's|REDIS_URL=.*|REDIS_URL=redis://localhost:6379|' .env
         sed -i 's|DEBUG=.*|DEBUG=true|' .env
-    
+
+    - name: Run black code formatting check
+      working-directory: ./backend
+      run: |
+        black --check --diff .
+
+    - name: Run flake8 linting
+      working-directory: ./backend
+      run: |
+        flake8 .
+
     - name: Run database migrations
       working-directory: ./backend
       run: |
         alembic upgrade head
-    
+
     - name: Run tests with coverage
       working-directory: ./backend
       run: |
         pytest --cov=app --cov-report=xml --cov-report=term-missing --cov-fail-under=80
-    
+
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
       with:

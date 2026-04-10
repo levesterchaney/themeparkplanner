@@ -1,25 +1,25 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/auth';
 
 export default function LogoutPage() {
   const router = useRouter();
 
-  const performLogout = async () => {
+  const performLogout = useCallback(async () => {
     try {
       await authService.logout();
       router.push('/login');
-    } catch (error) {
+    } catch {
       //TODO how to handle logout failure? Redirect to home page with error message?
       router.push('/'); // Redirect to home page on logout failure for now
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     performLogout();
-  }, [router]);
+  }, [performLogout]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">

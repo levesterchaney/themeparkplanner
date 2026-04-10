@@ -9,12 +9,12 @@ This directory contains GitHub Actions workflows for automated testing and deplo
 - **Tests**: Python 3.9, 3.10, 3.11 with PostgreSQL and Redis
 - **Steps**:
   - Install dependencies
-  - Run database migrations  
+  - Run database migrations
   - Run tests with coverage
   - Upload coverage to Codecov
 
 ### 🎨 Frontend CI (`frontend-ci.yml`)
-- **Triggers**: Push/PR to `main` or `develop` with frontend changes  
+- **Triggers**: Push/PR to `main` or `develop` with frontend changes
 - **Tests**: Node.js 18, 20
 - **Steps**:
   - Install dependencies
@@ -27,7 +27,7 @@ This directory contains GitHub Actions workflows for automated testing and deplo
 - **Triggers**: Push/PR to `main` branch
 - **Jobs**:
   - Backend tests (Python 3.11)
-  - Frontend tests (Node.js 20) 
+  - Frontend tests (Node.js 20)
   - Integration tests (both services)
 - **Features**:
   - Health checks for API and frontend
@@ -40,7 +40,7 @@ Add these badges to your README:
 
 ```markdown
 ![Backend CI](https://github.com/yourusername/themeparkplanner/workflows/Backend%20CI/badge.svg)
-![Frontend CI](https://github.com/yourusername/themeparkplanner/workflows/Frontend%20CI/badge.svg)  
+![Frontend CI](https://github.com/yourusername/themeparkplanner/workflows/Frontend%20CI/badge.svg)
 ![Full Stack CI](https://github.com/yourusername/themeparkplanner/workflows/Full%20Stack%20CI/badge.svg)
 ```
 
@@ -48,7 +48,7 @@ Add these badges to your README:
 
 ### Backend Environment Variables
 - `DATABASE_URL`: PostgreSQL connection string
-- `REDIS_URL`: Redis connection string  
+- `REDIS_URL`: Redis connection string
 - `DEBUG`: Enable debug mode
 
 ### Frontend Environment Variables
@@ -61,6 +61,6 @@ Use the test runners for local development:
 # Backend
 cd backend && ./run_tests.sh coverage
 
-# Frontend  
+# Frontend
 cd frontend && ./run_tests.sh coverage
 ```

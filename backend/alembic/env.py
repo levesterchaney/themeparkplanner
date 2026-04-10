@@ -1,6 +1,6 @@
+import asyncio
 import os
 import sys
-import asyncio
 from logging.config import fileConfig
 
 from sqlalchemy import pool
@@ -8,15 +8,26 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
 
-# Add the parent directory to Python path to import from app
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 # Import the Base class from your application
 from app.core.database import Base
 
 # Import all models to ensure they are registered with Base.metadata
-from app.models import User, UserPreference, Session, PasswordResetToken, Trip, Itinerary, ItineraryPark, ItineraryItem, \
-    Park, Attraction, ChatMessage  # noqa
+from app.models import (  # noqa
+    Attraction,
+    ChatMessage,
+    Itinerary,
+    ItineraryItem,
+    ItineraryPark,
+    Park,
+    PasswordResetToken,
+    Session,
+    Trip,
+    User,
+    UserPreference,
+)
+
+# Add the parent directory to Python path to import from app
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -86,9 +97,9 @@ def run_migrations_online() -> None:
     """
     url = get_database_url()
 
-    configuration = {
-        "sqlalchemy.url": url,
-    }
+    # configuration = {
+    #     "sqlalchemy.url": url,
+    # }
 
     connectable = create_async_engine(
         url,
