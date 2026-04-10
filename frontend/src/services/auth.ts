@@ -8,5 +8,9 @@ export const authService = {
 
     login: async (email: string, password: string) => {
         return apiClient.post('/api/v1/auth/login', { email, password });
+    },
+
+    logout: async () => {
+        return apiClient.post('/api/v1/auth/logout');
     }
 };

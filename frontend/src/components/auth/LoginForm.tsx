@@ -22,8 +22,9 @@ export default function LoginForm() {
             await authService.login(email, password);
             //TODO Redirect to login page once implemented
             router.push("/");
-        } catch (error) {
-            setError("Login attempt failed. Please check your credentials and try again.");
+        } catch (error: any) {
+            console.log('Login error:', error);
+            setError(error?.details?.error || error?.message || "Login attempt failed. Please check your credentials and try again.");
         } finally {
             setLoading(false);
         }
