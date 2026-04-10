@@ -1,10 +1,12 @@
 'use client';
 
+import { useCallback } from 'react';
 import { useApi } from '@/hooks/use-api';
 import { healthService } from '@/services';
 
 export default function HealthCheck() {
-  const { data, loading, error, execute } = useApi(() => healthService.getSystemHealth());
+  const getSystemHealth = useCallback(() => healthService.getSystemHealth(), []);
+  const { data, loading, error, execute } = useApi(getSystemHealth, { immediate: true });
 
   const getStatusColor = (status?: string) => {
     switch (status) {

@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import text
 from ..core.database import AsyncSessionLocal
 from ..core.redis import redis_client
-import asyncio
 
 
 router = APIRouter()
