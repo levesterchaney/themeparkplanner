@@ -4,6 +4,9 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.env.staging
+.env.development
+.env.production
 
 # Python
 __pycache__/
@@ -50,7 +53,9 @@ venv.bak/
 # pytest
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
+coverage.xml
 .tox/
 .nox/
 
@@ -63,6 +68,10 @@ dmypy.json
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
+*.sql.dump
+*.dump
+local.db
 
 # Logs
 logs/
@@ -92,6 +101,9 @@ out/
 
 # React
 build/
+
+# Jest/Testing
+coverage/
 
 # Dependency directories
 jspm_packages/
