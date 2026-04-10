@@ -9,6 +9,10 @@ export default function RegistrationForm() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
+    const isValidPassword = (password: string): boolean => {
+        return password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /\d/.test(password);
+    }
+
     const register = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setLoading(true);
@@ -17,17 +21,33 @@ export default function RegistrationForm() {
         const formData = new FormData(event.currentTarget);
         const data = {
             firstName: formData.get('first-name') as string,
-            lastName: formData.get('last-name') as string,
             email: formData.get('email') as string,
             password: formData.get('password') as string,
         };
+        if (formData.has('last-name')) {
+            data['lastName'] = formData.get('last-name') as string;
+        }
+
+        // Basic validation
+        if (!data.firstName) {
+            setError("First name is required.");
+        }
+        if (!data.email) {
+            setError("Email is required.");
+        }
+        if (!data.password) {
+            setError("Password is required.");
+        }
+        if (!isValidPassword(data.password)) {
+            setError("Password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers.");
+        }
 
         try {
             await authService.register(data);
             // Redirect to login page once implemented
             router.push('/');
         } catch (error: any) {
-            // Show error message to user
+            // Surface error message to user
             console.log('Registration error:', error);
             setError(error?.details?.error || error?.message || "Registration attempt failed. Please try again.");
         } finally {

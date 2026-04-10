@@ -46,7 +46,7 @@ async def register_user(registration_data: UserRegistrationData, response: Respo
     existing_user = await db.execute(select(User).where(User.email == registration_data.email))
     if existing_user.scalar() is not None:
         response.status_code = status.HTTP_409_CONFLICT
-        return {"error": "Email is already in use"}
+        return {"error": "An account with this email already exists."}
 
     hashed_pass = bcrypt.hashpw(registration_data.password.encode('utf-8'), bcrypt.gensalt())
 
