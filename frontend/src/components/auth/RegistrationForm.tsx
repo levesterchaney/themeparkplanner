@@ -21,12 +21,10 @@ export default function RegistrationForm() {
         const formData = new FormData(event.currentTarget);
         const data = {
             firstName: formData.get('first-name') as string,
+            lastName: formData.get('last-name') as string || undefined,
             email: formData.get('email') as string,
             password: formData.get('password') as string,
         };
-        if (formData.has('last-name')) {
-            data['lastName'] = formData.get('last-name') as string;
-        }
 
         // Basic validation
         if (!data.firstName) {
@@ -44,7 +42,7 @@ export default function RegistrationForm() {
 
         try {
             await authService.register(data);
-            // Redirect to login page once implemented
+            //TODO Redirect to login page once implemented
             router.push('/');
         } catch (error: any) {
             // Surface error message to user
