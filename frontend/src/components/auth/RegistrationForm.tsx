@@ -34,17 +34,25 @@ export default function RegistrationForm() {
     // Basic validation
     if (!data.firstName) {
       setError('First name is required.');
+      setLoading(false);
+      return;
     }
     if (!data.email) {
       setError('Email is required.');
+      setLoading(false);
+      return;
     }
     if (!data.password) {
       setError('Password is required.');
+      setLoading(false);
+      return;
     }
     if (!isValidPassword(data.password)) {
       setError(
         'Password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers.'
       );
+      setLoading(false);
+      return;
     }
 
     try {
@@ -77,7 +85,6 @@ export default function RegistrationForm() {
             name="first-name"
             type="text"
             autoComplete="first-name"
-            required
             className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             placeholder="First Name"
           />
@@ -104,7 +111,6 @@ export default function RegistrationForm() {
             name="email"
             type="email"
             autoComplete="email"
-            required
             className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             placeholder="Email address"
           />
@@ -118,7 +124,6 @@ export default function RegistrationForm() {
             name="password"
             type="password"
             autoComplete="current-password"
-            required
             className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             placeholder="Password"
           />

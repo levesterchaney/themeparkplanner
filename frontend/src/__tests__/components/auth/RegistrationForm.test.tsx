@@ -39,7 +39,7 @@ describe('RegistrationForm Component', () => {
     ).toBeInTheDocument();
   });
 
-  test('validates required fields', async () => {
+  test('validates first name is required', async () => {
     const user = userEvent.setup();
     render(<RegistrationForm />);
 
@@ -49,7 +49,35 @@ describe('RegistrationForm Component', () => {
     expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
   });
 
-  test('validates password strength', async () => {
+  test('validates email is required', async () => {
+    const user = userEvent.setup();
+    render(<RegistrationForm />);
+
+    await user.type(screen.getByPlaceholderText(/first name/i), 'John');
+
+    const submitButton = screen.getByRole('button', { name: /register/i });
+    await user.click(submitButton);
+
+    expect(screen.getByText(/email is required/i)).toBeInTheDocument();
+  });
+
+  test('validates password is required', async () => {
+    const user = userEvent.setup();
+    render(<RegistrationForm />);
+
+    await user.type(screen.getByPlaceholderText(/first name/i), 'John');
+    await user.type(
+      screen.getByPlaceholderText(/email address/i),
+      'john@example.com'
+    );
+
+    const submitButton = screen.getByRole('button', { name: /register/i });
+    await user.click(submitButton);
+
+    expect(screen.getByText(/password is required/i)).toBeInTheDocument();
+  });
+
+  test('validates password strength - too short', async () => {
     const user = userEvent.setup();
     render(<RegistrationForm />);
 
@@ -68,7 +96,70 @@ describe('RegistrationForm Component', () => {
     ).toBeInTheDocument();
   });
 
-  test('submits form with valid data', async () => {
+  test('validates password strength - missing uppercase', async () => {
+    const user = userEvent.setup();
+    render(<RegistrationForm />);
+
+    await user.type(screen.getByPlaceholderText(/first name/i), 'John');
+    await user.type(
+      screen.getByPlaceholderText(/email address/i),
+      'john@example.com'
+    );
+    await user.type(
+      screen.getByPlaceholderText(/password/i),
+      'weakpassword123'
+    );
+
+    const submitButton = screen.getByRole('button', { name: /register/i });
+    await user.click(submitButton);
+
+    expect(
+      screen.getByText(/password must be at least 8 characters/i)
+    ).toBeInTheDocument();
+  });
+
+  test('validates password strength - missing lowercase', async () => {
+    const user = userEvent.setup();
+    render(<RegistrationForm />);
+
+    await user.type(screen.getByPlaceholderText(/first name/i), 'John');
+    await user.type(
+      screen.getByPlaceholderText(/email address/i),
+      'john@example.com'
+    );
+    await user.type(
+      screen.getByPlaceholderText(/password/i),
+      'WEAKPASSWORD123'
+    );
+
+    const submitButton = screen.getByRole('button', { name: /register/i });
+    await user.click(submitButton);
+
+    expect(
+      screen.getByText(/password must be at least 8 characters/i)
+    ).toBeInTheDocument();
+  });
+
+  test('validates password strength - missing numbers', async () => {
+    const user = userEvent.setup();
+    render(<RegistrationForm />);
+
+    await user.type(screen.getByPlaceholderText(/first name/i), 'John');
+    await user.type(
+      screen.getByPlaceholderText(/email address/i),
+      'john@example.com'
+    );
+    await user.type(screen.getByPlaceholderText(/password/i), 'WeakPassword');
+
+    const submitButton = screen.getByRole('button', { name: /register/i });
+    await user.click(submitButton);
+
+    expect(
+      screen.getByText(/password must be at least 8 characters/i)
+    ).toBeInTheDocument();
+  });
+
+  test('submits form with valid data including last name', async () => {
     const user = userEvent.setup();
     mockAuthService.register.mockResolvedValue({});
 
@@ -100,7 +191,39 @@ describe('RegistrationForm Component', () => {
     expect(mockPush).toHaveBeenCalledWith('/');
   });
 
-  test('displays error on registration failure', async () => {
+  test('submits form with valid data without last name', async () => {
+    const user = userEvent.setup();
+    mockAuthService.register.mockResolvedValue({});
+
+    render(<RegistrationForm />);
+
+    await user.type(screen.getByPlaceholderText(/first name/i), 'John');
+    // Skip last name field
+    await user.type(
+      screen.getByPlaceholderText(/email address/i),
+      'john@example.com'
+    );
+    await user.type(
+      screen.getByPlaceholderText(/password/i),
+      'StrongPassword123'
+    );
+
+    const submitButton = screen.getByRole('button', { name: /register/i });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockAuthService.register).toHaveBeenCalledWith({
+        firstName: 'John',
+        lastName: undefined,
+        email: 'john@example.com',
+        password: 'StrongPassword123',
+      });
+    });
+
+    expect(mockPush).toHaveBeenCalledWith('/');
+  });
+
+  test('displays error on registration failure with details.error', async () => {
     const user = userEvent.setup();
     mockAuthService.register.mockRejectedValue({
       details: { error: 'Email already exists' },
@@ -123,6 +246,83 @@ describe('RegistrationForm Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/email already exists/i)).toBeInTheDocument();
+    });
+  });
+
+  test('displays error on registration failure with message property', async () => {
+    const user = userEvent.setup();
+    mockAuthService.register.mockRejectedValue({
+      message: 'Server error occurred',
+    });
+
+    render(<RegistrationForm />);
+
+    await user.type(screen.getByPlaceholderText(/first name/i), 'John');
+    await user.type(
+      screen.getByPlaceholderText(/email address/i),
+      'john@example.com'
+    );
+    await user.type(
+      screen.getByPlaceholderText(/password/i),
+      'StrongPassword123'
+    );
+
+    const submitButton = screen.getByRole('button', { name: /register/i });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/server error occurred/i)).toBeInTheDocument();
+    });
+  });
+
+  test('displays error message from Error object', async () => {
+    const user = userEvent.setup();
+    mockAuthService.register.mockRejectedValue(new Error('Network failed'));
+
+    render(<RegistrationForm />);
+
+    await user.type(screen.getByPlaceholderText(/first name/i), 'John');
+    await user.type(
+      screen.getByPlaceholderText(/email address/i),
+      'john@example.com'
+    );
+    await user.type(
+      screen.getByPlaceholderText(/password/i),
+      'StrongPassword123'
+    );
+
+    const submitButton = screen.getByRole('button', { name: /register/i });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/network failed/i)).toBeInTheDocument();
+    });
+  });
+
+  test('displays generic error message when error has no details or message', async () => {
+    const user = userEvent.setup();
+    // Create an error object that has neither details.error nor message
+    mockAuthService.register.mockRejectedValue({ someOtherProperty: 'value' });
+
+    render(<RegistrationForm />);
+
+    await user.type(screen.getByPlaceholderText(/first name/i), 'John');
+    await user.type(
+      screen.getByPlaceholderText(/email address/i),
+      'john@example.com'
+    );
+    await user.type(
+      screen.getByPlaceholderText(/password/i),
+      'StrongPassword123'
+    );
+
+    const submitButton = screen.getByRole('button', { name: /register/i });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/registration attempt failed/i)
+      ).toBeInTheDocument();
     });
   });
 
