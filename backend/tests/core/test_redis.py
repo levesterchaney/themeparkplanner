@@ -61,11 +61,17 @@ class TestRedisClient:
     async def test_get_redis_without_existing_connection(self):
         """Test get_redis when no connection exists."""
         client = RedisClient()
+        # Ensure no existing connection
+        client.redis = None
 
         with patch.object(client, "init_redis") as mock_init:
             mock_redis = AsyncMock()
-            mock_init.return_value = mock_redis
-            client.redis = mock_redis
+
+            async def mock_init_redis():
+                client.redis = mock_redis
+                return mock_redis
+
+            mock_init.side_effect = mock_init_redis
 
             result = await client.get_redis()
 

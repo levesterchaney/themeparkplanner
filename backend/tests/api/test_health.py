@@ -171,7 +171,7 @@ class TestHealthAPI:
             # Mock successful Redis connection
             mock_redis = AsyncMock()
             mock_redis.ping = AsyncMock()
-            mock_redis_client.get_redis.return_value = mock_redis
+            mock_redis_client.get_redis = AsyncMock(return_value=mock_redis)
 
             async with AsyncClient(app=app, base_url="http://testserver") as client:
                 response = await client.get("/api/v1/health/redis")
