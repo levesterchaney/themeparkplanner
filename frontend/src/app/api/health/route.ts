@@ -5,7 +5,7 @@ export async function GET() {
     {
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      service: 'theme-park-planner-frontend',
+      service: 'theme-park-planner-ui',
     },
     { status: 200 }
   );

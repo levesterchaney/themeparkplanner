@@ -359,10 +359,10 @@ vercel --prod
 ### Docker Deployment
 ```bash
 # Build image
-docker build -t themeparkplanner-frontend .
+docker build -t themeparkplanner-ui .
 
 # Run container
-docker run -p 3000:3000 themeparkplanner-frontend
+docker run -p 3000:3000 themeparkplanner-ui
 ```
 
 ### Static Export
