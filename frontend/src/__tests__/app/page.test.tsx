@@ -13,8 +13,9 @@ jest.mock('@/components/HealthCheck', () => {
   };
 });
 
-const { cookies } = jest.mocked(await import('next/headers'));
-const mockCookies = cookies;
+// Import the cookies function directly for mocking
+import { cookies } from 'next/headers';
+const mockCookies = jest.mocked(cookies);
 
 describe('Home Page', () => {
   beforeEach(() => {

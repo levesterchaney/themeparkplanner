@@ -55,8 +55,11 @@ class TestDatabase:
             # Create generator
             db_generator = get_db()
 
-            # Get the session
-            # session = await db_generator.__anext__()
+            # Get the session to start the generator
+            session = await db_generator.__anext__()
+
+            # Verify we got the session
+            assert session == mock_session
 
             # Simulate an exception during usage
             try:

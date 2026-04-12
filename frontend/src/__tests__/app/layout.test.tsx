@@ -2,6 +2,25 @@ import { render, screen } from '@testing-library/react';
 import RootLayout, { metadata } from '@/app/layout';
 
 describe('RootLayout', () => {
+  beforeEach(() => {
+    // Suppress expected console errors for layout testing
+    const originalError = console.error;
+    jest.spyOn(console, 'error').mockImplementation((...args) => {
+      const message = typeof args[0] === 'string' ? args[0] : '';
+      if (message.includes('In HTML, <html> cannot be a child of <div>')) {
+        return;
+      }
+      if (message.includes('This will cause a hydration error')) {
+        return;
+      }
+      originalError.apply(console, args);
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('renders children correctly', () => {
     render(
       <RootLayout>
