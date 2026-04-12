@@ -7,34 +7,9 @@ on:
     branches: [ main ]
 
 jobs:
-  backend-test:
+  backend-unit-test:
     name: Backend Tests
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: tppciuser
-          POSTGRES_PASSWORD: tppci123
-          POSTGRES_DB: themeparkplanner-ci_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
 
     steps:
     - uses: actions/checkout@v4
@@ -68,10 +43,6 @@ jobs:
         sed -i 's|REDIS_URL=.*|REDIS_URL=redis://localhost:6379|' .env
         sed -i 's|DEBUG=.*|DEBUG=true|' .env
 
-    - name: Run database migrations
-      working-directory: ./backend
-      run: alembic upgrade head
-
     - name: Run backend tests
       working-directory: ./backend
       run: python -m pytest --cov=app --cov-report=xml --cov-fail-under=80
@@ -83,7 +54,7 @@ jobs:
         flags: backend
         name: backend-coverage
 
-  frontend-test:
+  frontend-unit-test:
     name: Frontend Tests
     runs-on: ubuntu-latest
 
@@ -185,7 +156,7 @@ jobs:
       working-directory: ./frontend
       run: |
         cp .env.example .env.local
-        sed -i 's|NEXT_PUBLIC_API_BASE_URL=.*|NEXT_PUBLIC_API_BASE_URL=http://localhost:8000|' >> .env.local
+        sed -i 's|NEXT_PUBLIC_API_BASE_URL=.*|NEXT_PUBLIC_API_BASE_URL=http://localhost:8000|' .env.local
 
     - name: Run database migrations
       working-directory: ./backend

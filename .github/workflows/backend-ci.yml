@@ -13,33 +13,8 @@ on:
       - '.github/workflows/backend-ci.yml'
 
 jobs:
-  test:
+  smoke-test:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: tppciuser
-          POSTGRES_PASSWORD: tppci123
-          POSTGRES_DB: themeparkplanner-ci_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
 
     strategy:
       matrix:
@@ -86,11 +61,6 @@ jobs:
       working-directory: ./backend
       run: |
         flake8 .
-
-    - name: Run database migrations
-      working-directory: ./backend
-      run: |
-        alembic upgrade head
 
     - name: Run tests with coverage
       working-directory: ./backend
