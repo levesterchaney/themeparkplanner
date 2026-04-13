@@ -8,10 +8,13 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_db
-from app.models import Session, User, UserPreference
+from app.models import PasswordResetToken, Session, User, UserPreference
+from app.services.email import send_email
 
 SESSION_TIMEOUT_DAYS = 30  # 30 days
+PASSWORD_RESET_TOKEN_EXPIRATION_HOURS = 1  # 1 hour
 
 router = APIRouter()
 
@@ -26,6 +29,10 @@ class UserRegistrationData(BaseModel):
 class UserLoginData(BaseModel):
     email: str
     password: str
+
+
+class ForgotPasswordData(BaseModel):
+    email: str
 
 
 @router.post("/auth/register", status_code=status.HTTP_201_CREATED)
@@ -193,3 +200,68 @@ async def logout_user(
         return {"error": "User logout failed"}
 
     return {"message": "Logout successful"}
+
+
+@router.post("/auth/forgot-password", status_code=status.HTTP_200_OK)
+async def forgot_password(
+    forgot_data: ForgotPasswordData,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Forgot password endpoint.
+
+    Generates a password reset token for the user with the provided email and
+    sends an email with instructions to reset the password. The token is valid
+    for a limited time.
+
+    Returns:
+        200 OK if the email was sent successfully (even if the email does not exist)
+        422 if there are validation errors
+    """
+    default_msg = "If an account with that email exists, a reset link has been sent."
+    existing_user = await db.execute(
+        select(User).where(User.email == forgot_data.email)
+    )
+    user = existing_user.scalar()
+
+    if user is None:
+        # To prevent email enumeration, we return success even if the user doesn't exist
+        return {"message": default_msg}
+
+    try:
+        # Generate a password reset token
+        reset_token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(
+            hours=PASSWORD_RESET_TOKEN_EXPIRATION_HOURS
+        )
+
+        # Store the reset token in the database
+        password_reset = PasswordResetToken(
+            user_id=user.id,
+            token_hash=reset_token,
+            expires_at=expires_at,
+        )
+        db.add(password_reset)
+        await db.commit()
+
+        reset_link = f"{settings.frontend_base_url}/reset-password?token={reset_token}"
+
+        # Send the password reset email
+        await send_email(
+            to_email=user.email,
+            subject="Reset your ThemeParkPlanner password",
+            body={
+                "name": user.first_name,
+                "email": user.email,
+                "reset_url": reset_link,
+                "unsubscribe_url": f"{settings.frontend_base_url}/unsubscribe",
+                "privacy_url": f"{settings.frontend_base_url}/privacy",
+            },
+            template="password_reset.html",
+        )
+    except Exception:
+        response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        return {"error": "Failed to process forgot password request"}
+
+    return {"message": default_msg}

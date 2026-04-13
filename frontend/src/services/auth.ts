@@ -13,4 +13,8 @@ export const authService = {
   logout: async () => {
     return apiClient.post('/api/v1/auth/logout');
   },
+
+  sendPasswordReset: async (email: string) => {
+    return apiClient.post('/api/v1/auth/forgot-password', { email });
+  },
 };
