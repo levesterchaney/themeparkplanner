@@ -1,20 +1,34 @@
+import asyncio
 import os
 import sys
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
 from sqlalchemy import pool
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
-
-# Add the parent directory to Python path to import from app
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 # Import the Base class from your application
 from app.core.database import Base
 
 # Import all models to ensure they are registered with Base.metadata
-from app.models import User, UserPreference, Session, PasswordResetToken, Trip, Itinerary, ItineraryPark, ItineraryItem, Park, Attraction, ChatMessage  # noqa
+# These imports are needed for alembic autogenerate to work properly
+from app.models import (  # noqa: F401
+    Attraction,
+    ChatMessage,
+    Itinerary,
+    ItineraryItem,
+    ItineraryPark,
+    Park,
+    PasswordResetToken,
+    Session,
+    Trip,
+    User,
+    UserPreference,
+)
+
+# Add the parent directory to Python path to import from app
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -31,27 +45,34 @@ target_metadata = Base.metadata
 
 
 def get_database_url():
-    """Get database URL from environment or alembic.ini."""
-    # Priority: DATABASE_URL env var > alembic.ini 
-    database_url = None
-    
-    # Check environment variable first
-    if os.getenv("DATABASE_URL"):
-        database_url = os.getenv("DATABASE_URL")
-    else:
-        # Fallback to alembic.ini
-        database_url = config.get_main_option("sqlalchemy.url")
-    
-    # Convert asyncpg to psycopg2 for Alembic compatibility
-    if database_url and "postgresql+asyncpg" in database_url:
-        database_url = database_url.replace("postgresql+asyncpg", "postgresql+psycopg2")
-    
-    return database_url
+    """Get database URL from application settings or environment variables."""
+    try:
+        # Try to use application settings first
+        from app.core.config import settings
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+        return settings.database_connection_url
+    except ImportError:
+        # Fallback to environment variables and alembic.ini
+        database_url = None
+
+        # Check environment variable first
+        if os.getenv("DATABASE_URL"):
+            database_url = os.getenv("DATABASE_URL")
+        else:
+            # Fallback to alembic.ini
+            database_url = config.get_main_option("sqlalchemy.url")
+
+        # Ensure we use asyncpg for async migrations
+        if database_url and "postgresql+psycopg2" in database_url:
+            database_url = database_url.replace(
+                "postgresql+psycopg2", "postgresql+asyncpg"
+            )
+        elif database_url and "postgresql://" in database_url:
+            database_url = database_url.replace(
+                "postgresql://", "postgresql+asyncpg://"
+            )
+
+        return database_url
 
 
 def run_migrations_offline() -> None:
@@ -79,30 +100,30 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+    """Run migrations in 'online' mode with async support.
 
-    In this scenario we need to create an Engine
+    In this scenario we need to create an async Engine
     and associate a connection with the context.
 
     """
-    configuration = config.get_section(config.config_ini_section, {})
-    
-    # Use our configurable database URL
-    configuration["sqlalchemy.url"] = get_database_url()
-    
-    connectable = engine_from_config(
-        configuration,
-        prefix="sqlalchemy.",
+    url = get_database_url()
+
+    connectable = create_async_engine(
+        url,
         poolclass=pool.NullPool,
     )
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+    async def do_run_migrations() -> None:
+        async with connectable.connect() as connection:
+            await connection.run_sync(do_run_migrations_sync)
+
+    def do_run_migrations_sync(connection) -> None:
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
+
+    asyncio.run(do_run_migrations())
 
 
 if context.is_offline_mode():

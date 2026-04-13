@@ -1,4 +1,4 @@
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T;
   message?: string;
   success: boolean;
@@ -8,7 +8,7 @@ export interface ApiResponse<T = any> {
 export interface IApiError {
   message: string;
   status: number;
-  details?: any;
+  details?: unknown;
 }
 
 // Health Check Types
@@ -25,4 +25,3 @@ export interface RegistrationData {
   firstName?: string;
   lastName?: string;
 }
-

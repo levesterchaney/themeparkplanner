@@ -1,4 +1,85 @@
-node_modules
-.next
-build
-out
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js build outputs
+.next/
+out/
+build/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# Testing and coverage
+coverage/
+.nyc_output/
+jest_coverage/
+.coverage
+*.lcov
+
+# ESLint and Prettier cache
+.eslintcache
+.prettier-cache/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Storybook build outputs
+storybook-static/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# CI/CD
+.github/
+
+# Development tools
+.pre-commit-cache/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Package manager lock files (keep one based on preference)
+# Uncomment the ones you want to exclude:
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Logs
+*.log
+logs/
