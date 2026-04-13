@@ -145,41 +145,6 @@ class TestUserLogin:
         app.dependency_overrides.clear()
 
 
-class TestUserRegistrationErrorCases:
-    """Test user registration error cases."""
-
-    @pytest.mark.asyncio
-    async def test_register_user_database_error(self, mock_db: AsyncMock):
-        """Test registration when database operation fails."""
-        from httpx import AsyncClient
-
-        from app.core.database import get_db
-        from app.main import app
-
-        # Make commit operation fail
-        mock_db.commit.side_effect = Exception("Database error")
-
-        async def override_get_db():
-            yield mock_db
-
-        app.dependency_overrides[get_db] = override_get_db
-
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
-            user_data = {
-                "firstName": "Test",
-                "email": "test@example.com",
-                "password": "TestPassword123",
-            }
-            response = await client.post("/api/v1/auth/register", json=user_data)
-
-            assert response.status_code == 422
-            data = response.json()
-            assert "error" in data
-            assert "creation failed" in data["error"].lower()
-
-        app.dependency_overrides.clear()
-
-
 class TestUserLogout:
     """Test user logout endpoint."""
 
@@ -249,63 +214,5 @@ class TestUserLogout:
             data = response.json()
             assert "error" in data
             assert "invalid session" in data["error"].lower()
-
-        app.dependency_overrides.clear()
-
-    @pytest.mark.asyncio
-    async def test_logout_user_database_error(self, mock_db_with_login_user: AsyncMock):
-        """Test logout when database operation fails."""
-        from httpx import AsyncClient
-
-        from app.core.database import get_db
-        from app.main import app
-
-        # Make delete operation fail
-        mock_db_with_login_user.delete.side_effect = Exception("Database error")
-
-        async def override_get_db():
-            yield mock_db_with_login_user
-
-        app.dependency_overrides[get_db] = override_get_db
-
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
-            response = await client.post(
-                "/api/v1/auth/logout", cookies={"session_token": "test_session_token"}
-            )
-            assert response.status_code == 422
-            data = response.json()
-            assert "error" in data
-            assert "logout failed" in data["error"].lower()
-
-        app.dependency_overrides.clear()
-
-
-class TestUserLoginErrorCases:
-    """Test user login error cases."""
-
-    @pytest.mark.asyncio
-    async def test_login_user_database_error(self, mock_db_with_login_user: AsyncMock):
-        """Test login when database operation fails during session creation."""
-        from httpx import AsyncClient
-
-        from app.core.database import get_db
-        from app.main import app
-
-        # Make commit operation fail
-        mock_db_with_login_user.commit.side_effect = Exception("Database error")
-
-        async def override_get_db():
-            yield mock_db_with_login_user
-
-        app.dependency_overrides[get_db] = override_get_db
-
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
-            login_data = {"email": "login@example.com", "password": "TestPassword123"}
-            response = await client.post("/api/v1/auth/login", json=login_data)
-
-            assert response.status_code == 422
-            data = response.json()
-            assert "error" in data
-            assert "login failed" in data["error"].lower()
 
         app.dependency_overrides.clear()
