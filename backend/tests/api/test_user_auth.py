@@ -254,8 +254,8 @@ class TestForgotPassword:
                 mock_send_email.assert_called_once()
                 call_args = mock_send_email.call_args
                 assert call_args[1]["to_email"] == "login@example.com"
-                assert "Password Reset Request" in call_args[1]["subject"]
-                assert "reset-password?token=" in call_args[1]["body"]
+                assert call_args[1]["subject"] == "Reset your account password"
+                assert "reset-password?token=" in call_args[1]["body"]["reset_url"]
 
                 # Verify password reset token was stored in database
                 mock_db_with_login_user.add.assert_called()

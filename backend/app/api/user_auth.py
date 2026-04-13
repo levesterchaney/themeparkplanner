@@ -250,7 +250,7 @@ async def forgot_password(
         # Send the password reset email
         await send_email(
             to_email=user.email,
-            subject="Reset your ThemeParkPlanner password",
+            subject="Reset your account password",
             body={
                 "name": user.first_name,
                 "email": user.email,
