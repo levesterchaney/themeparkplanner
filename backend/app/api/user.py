@@ -53,13 +53,23 @@ async def user_details(
     user_data["lastName"] = user.last_name
     user_data["email"] = user.email
     user_data["avatar"] = user.avatar_url
-    user_data["preferences"] = {
-        "defaultPartySize": user_preferences.default_party_size,
-        "hasKids": user_preferences.has_kids,
-        "thrillLevel": user_preferences.thrill_level,
-        "accessibilityNeeds": user_preferences.accessibility_needs,
-        "dietaryRestrictions": user_preferences.dietary_restrictions,
-    }
+
+    if user_preferences:
+        user_data["preferences"] = {
+            "defaultPartySize": user_preferences.default_party_size,
+            "hasKids": user_preferences.has_kids,
+            "thrillLevel": user_preferences.thrill_level,
+            "accessibilityNeeds": user_preferences.accessibility_needs,
+            "dietaryRestrictions": user_preferences.dietary_restrictions,
+        }
+    else:
+        user_data["preferences"] = {
+            "defaultPartySize": None,
+            "hasKids": None,
+            "thrillLevel": None,
+            "accessibilityNeeds": None,
+            "dietaryRestrictions": None,
+        }
 
     return user_data
 
