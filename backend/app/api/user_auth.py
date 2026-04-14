@@ -14,7 +14,7 @@ from app.core.dependencies import get_current_user
 from app.models import PasswordResetToken, Session, User, UserPreference
 from app.services.email import send_email
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 class UserRegistrationData(BaseModel):
@@ -38,7 +38,7 @@ class ResetPasswordData(BaseModel):
     new_password: str
 
 
-@router.post("/auth/register", status_code=status.HTTP_201_CREATED)
+@router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(
     registration_data: UserRegistrationData,
     response: Response,
@@ -60,7 +60,10 @@ async def register_user(
     """
     if len(registration_data.password) < 8:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-        return {"error": "Password must be at least 8 characters long"}
+        return {
+            "error": "User creation failed.",
+            "details": "Password must be at least 8 characters long",
+        }
 
     existing_user = await db.execute(
         select(User).where(User.email == registration_data.email)
@@ -69,7 +72,10 @@ async def register_user(
 
     if user is not None:
         response.status_code = status.HTTP_409_CONFLICT
-        return {"error": "An account with this email already exists."}
+        return {
+            "error": "User creation failed.",
+            "details": "An account with this email already exists.",
+        }
 
     hashed_pass = bcrypt.hashpw(
         registration_data.password.encode("utf-8"), bcrypt.gensalt()
@@ -111,14 +117,14 @@ async def register_user(
             secure=True,
         )
         await db.commit()
-    except Exception:
+    except Exception as e:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-        return {"error": "User creation failed"}
+        return {"error": "User creation failed", "details": str(e)}
 
     return {"message": "User created successfully", "user_id": new_user.id}
 
 
-@router.post("/auth/login", status_code=status.HTTP_200_OK)
+@router.post("/login", status_code=status.HTTP_200_OK)
 async def login_user(
     login_data: UserLoginData, response: Response, db: AsyncSession = Depends(get_db)
 ):
@@ -140,7 +146,7 @@ async def login_user(
         login_data.password.encode("utf-8"), user.password_hash.encode("utf-8")
     ):
         response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {"error": "Invalid email or password"}
+        return {"error": "User login failed.", "details": "Invalid email or password"}
 
     try:
         # Create a new session for the user
@@ -161,14 +167,14 @@ async def login_user(
             secure=True,
         )
         await db.commit()
-    except Exception:
+    except Exception as e:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-        return {"error": "User login failed"}
+        return {"error": "User login failed", "details": str(e)}
 
     return {"message": "Login successful", "user_id": user.id}
 
 
-@router.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout_user(
     request: Request,
     response: Response,
@@ -211,7 +217,7 @@ async def logout_user(
     return
 
 
-@router.post("/auth/forgot-password", status_code=status.HTTP_200_OK)
+@router.post("/forgot-password", status_code=status.HTTP_200_OK)
 async def forgot_password(
     forgot_data: ForgotPasswordData,
     response: Response,
@@ -271,12 +277,12 @@ async def forgot_password(
         )
     except Exception:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-        return {"error": "Failed to process forgot password request"}
+        return {"error": "Failed to process forgot password request.", "details": ""}
 
     return {"message": default_msg}
 
 
-@router.post("/auth/reset-password", status_code=status.HTTP_200_OK)
+@router.post("/reset-password", status_code=status.HTTP_200_OK)
 async def reset_password(
     reset_data: ResetPasswordData,
     response: Response,
@@ -306,14 +312,17 @@ async def reset_password(
         or reset_token.used_at is not None
     ):
         response.status_code = status.HTTP_400_BAD_REQUEST
-        return {"error": "Reset token is either invalid, expired, or was already used."}
+        return {
+            "error": "Password reset failed.",
+            "details": "Reset token is either invalid, expired, or was already used.",
+        }
 
     user_result = await db.execute(select(User).where(User.id == reset_token.user_id))
     user = user_result.scalar()
 
     if user is None:
         response.status_code = status.HTTP_400_BAD_REQUEST
-        return {"error": "User not found"}
+        return {"error": "Password reset failed.", "details": "User not found"}
 
     user_sessions = await db.execute(select(Session).where(Session.user_id == user.id))
 
@@ -331,8 +340,8 @@ async def reset_password(
         # Delete the used password reset token
         await db.delete(reset_token)
         await db.commit()
-    except Exception:
+    except Exception as e:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-        return {"error": "Failed to reset password"}
+        return {"error": "Password reset failed.", "details": str(e)}
 
     return {"message": "Password reset successful"}
