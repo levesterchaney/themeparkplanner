@@ -449,3 +449,461 @@ class TestForgotPassword:
 
             # Email should not be sent for empty email
             mock_send_email.assert_not_called()
+
+
+class TestResetPassword:
+    """Test reset password endpoint."""
+
+    @pytest.mark.asyncio
+    async def test_reset_password_success(self):
+        """Test successful password reset with valid token."""
+        from datetime import datetime, timedelta
+        from unittest.mock import AsyncMock, Mock
+
+        import bcrypt
+        from httpx import AsyncClient
+
+        from app.core.database import get_db
+        from app.main import app
+        from app.models.users import PasswordResetToken, Session, User
+
+        # Create mock session with user and valid reset token
+        mock_session = AsyncMock()
+
+        # Create user
+        existing_user = User(
+            id=1,
+            email="reset@example.com",
+            password_hash=bcrypt.hashpw(
+                "OldPassword123".encode("utf-8"), bcrypt.gensalt()
+            ).decode("utf-8"),
+        )
+
+        # Create valid reset token
+        reset_token = PasswordResetToken(
+            id=1,
+            user_id=1,
+            token_hash="valid_reset_token",
+            expires_at=datetime.utcnow() + timedelta(hours=1),
+            used_at=None,
+        )
+
+        # Create user sessions to be deleted
+        user_sessions = [
+            Session(id=1, user_id=1, token="session1"),
+            Session(id=2, user_id=1, token="session2"),
+        ]
+
+        def mock_execute(query):
+            mock_result = Mock()
+            query_str = str(query)
+
+            if (
+                "password_reset_tokens" in query_str.lower()
+                and "token_hash" in query_str.lower()
+            ):
+                mock_result.scalar.return_value = reset_token
+            elif "users" in query_str.lower() and "users.id" in query_str.lower():
+                mock_result.scalar.return_value = existing_user
+            elif "sessions" in query_str.lower() and "user_id" in query_str.lower():
+                mock_result.scalars.return_value.all.return_value = user_sessions
+            else:
+                mock_result.scalar.return_value = None
+
+            return mock_result
+
+        mock_session.execute.side_effect = mock_execute
+        mock_session.commit = AsyncMock()
+        mock_session.delete = AsyncMock()
+
+        async def override_get_db():
+            yield mock_session
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            reset_data = {
+                "token": "valid_reset_token",
+                "new_password": "NewPassword123",
+            }
+            response = await client.post("/api/v1/auth/reset-password", json=reset_data)
+
+            assert response.status_code == 200
+            data = response.json()
+            assert "password reset successful" in data["message"].lower()
+
+            # Verify user password was updated
+            assert existing_user.password_hash != bcrypt.hashpw(
+                "OldPassword123".encode("utf-8"), bcrypt.gensalt()
+            ).decode("utf-8")
+
+            # Verify sessions were deleted
+            assert mock_session.delete.call_count >= 1
+
+            # Verify commit was called
+            mock_session.commit.assert_called()
+
+        app.dependency_overrides.clear()
+
+    @pytest.mark.asyncio
+    async def test_reset_password_invalid_token(self, client: AsyncClient):
+        """Test reset password with invalid token."""
+        reset_data = {"token": "invalid_token", "new_password": "NewPassword123"}
+        response = await client.post("/api/v1/auth/reset-password", json=reset_data)
+
+        assert response.status_code == 400
+        data = response.json()
+        assert "invalid" in data["error"].lower()
+
+    @pytest.mark.asyncio
+    async def test_reset_password_expired_token(self):
+        """Test reset password with expired token."""
+        from datetime import datetime, timedelta
+        from unittest.mock import AsyncMock, Mock
+
+        from httpx import AsyncClient
+
+        from app.core.database import get_db
+        from app.main import app
+        from app.models.users import PasswordResetToken
+
+        mock_session = AsyncMock()
+
+        # Create expired reset token
+        expired_token = PasswordResetToken(
+            id=1,
+            user_id=1,
+            token_hash="expired_token",
+            expires_at=datetime.utcnow() - timedelta(hours=1),  # Expired
+            used_at=None,
+        )
+
+        def mock_execute(query):
+            mock_result = Mock()
+            query_str = str(query)
+
+            if (
+                "password_reset_tokens" in query_str.lower()
+                and "token_hash" in query_str.lower()
+            ):
+                mock_result.scalar.return_value = expired_token
+            else:
+                mock_result.scalar.return_value = None
+
+            return mock_result
+
+        mock_session.execute.side_effect = mock_execute
+
+        async def override_get_db():
+            yield mock_session
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            reset_data = {"token": "expired_token", "new_password": "NewPassword123"}
+            response = await client.post("/api/v1/auth/reset-password", json=reset_data)
+
+            assert response.status_code == 400
+            data = response.json()
+            assert "expired" in data["error"].lower()
+
+        app.dependency_overrides.clear()
+
+    @pytest.mark.asyncio
+    async def test_reset_password_used_token(self):
+        """Test reset password with already used token."""
+        from datetime import datetime, timedelta
+        from unittest.mock import AsyncMock, Mock
+
+        from httpx import AsyncClient
+
+        from app.core.database import get_db
+        from app.main import app
+        from app.models.users import PasswordResetToken
+
+        mock_session = AsyncMock()
+
+        # Create used reset token
+        used_token = PasswordResetToken(
+            id=1,
+            user_id=1,
+            token_hash="used_token",
+            expires_at=datetime.utcnow() + timedelta(hours=1),
+            used_at=datetime.utcnow() - timedelta(minutes=30),  # Already used
+        )
+
+        def mock_execute(query):
+            mock_result = Mock()
+            query_str = str(query)
+
+            if (
+                "password_reset_tokens" in query_str.lower()
+                and "token_hash" in query_str.lower()
+            ):
+                mock_result.scalar.return_value = used_token
+            else:
+                mock_result.scalar.return_value = None
+
+            return mock_result
+
+        mock_session.execute.side_effect = mock_execute
+
+        async def override_get_db():
+            yield mock_session
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            reset_data = {"token": "used_token", "new_password": "NewPassword123"}
+            response = await client.post("/api/v1/auth/reset-password", json=reset_data)
+
+            assert response.status_code == 400
+            data = response.json()
+            assert "already used" in data["error"].lower()
+
+        app.dependency_overrides.clear()
+
+    @pytest.mark.asyncio
+    async def test_reset_password_user_not_found(self):
+        """Test reset password when user is deleted after token creation."""
+        from datetime import datetime, timedelta
+        from unittest.mock import AsyncMock, Mock
+
+        from httpx import AsyncClient
+
+        from app.core.database import get_db
+        from app.main import app
+        from app.models.users import PasswordResetToken
+
+        mock_session = AsyncMock()
+
+        # Create valid reset token but user doesn't exist
+        reset_token = PasswordResetToken(
+            id=1,
+            user_id=999,  # Non-existent user
+            token_hash="orphaned_token",
+            expires_at=datetime.utcnow() + timedelta(hours=1),
+            used_at=None,
+        )
+
+        def mock_execute(query):
+            mock_result = Mock()
+            query_str = str(query)
+
+            if (
+                "password_reset_tokens" in query_str.lower()
+                and "token_hash" in query_str.lower()
+            ):
+                mock_result.scalar.return_value = reset_token
+            elif "users" in query_str.lower() and "users.id" in query_str.lower():
+                mock_result.scalar.return_value = None  # User not found
+            else:
+                mock_result.scalar.return_value = None
+
+            return mock_result
+
+        mock_session.execute.side_effect = mock_execute
+
+        async def override_get_db():
+            yield mock_session
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            reset_data = {"token": "orphaned_token", "new_password": "NewPassword123"}
+            response = await client.post("/api/v1/auth/reset-password", json=reset_data)
+
+            assert response.status_code == 400
+            data = response.json()
+            assert "user not found" in data["error"].lower()
+
+        app.dependency_overrides.clear()
+
+    @pytest.mark.asyncio
+    async def test_reset_password_database_failure(self):
+        """Test reset password when database operation fails."""
+        from datetime import datetime, timedelta
+        from unittest.mock import AsyncMock, Mock
+
+        import bcrypt
+        from httpx import AsyncClient
+
+        from app.core.database import get_db
+        from app.main import app
+        from app.models.users import PasswordResetToken, User
+
+        mock_session = AsyncMock()
+
+        # Create valid reset token and user
+        existing_user = User(
+            id=1,
+            email="reset@example.com",
+            password_hash=bcrypt.hashpw(
+                "OldPassword123".encode("utf-8"), bcrypt.gensalt()
+            ).decode("utf-8"),
+        )
+
+        reset_token = PasswordResetToken(
+            id=1,
+            user_id=1,
+            token_hash="valid_token",
+            expires_at=datetime.utcnow() + timedelta(hours=1),
+            used_at=None,
+        )
+
+        def mock_execute(query):
+            mock_result = Mock()
+            query_str = str(query)
+
+            if (
+                "password_reset_tokens" in query_str.lower()
+                and "token_hash" in query_str.lower()
+            ):
+                mock_result.scalar.return_value = reset_token
+            elif "users" in query_str.lower() and "users.id" in query_str.lower():
+                mock_result.scalar.return_value = existing_user
+            elif "sessions" in query_str.lower() and "user_id" in query_str.lower():
+                mock_result.scalars.return_value.all.return_value = []
+            else:
+                mock_result.scalar.return_value = None
+
+            return mock_result
+
+        mock_session.execute.side_effect = mock_execute
+        mock_session.delete = AsyncMock()
+        # Make commit fail
+        mock_session.commit.side_effect = Exception("Database error")
+
+        async def override_get_db():
+            yield mock_session
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            reset_data = {"token": "valid_token", "new_password": "NewPassword123"}
+            response = await client.post("/api/v1/auth/reset-password", json=reset_data)
+
+            assert response.status_code == 422
+            data = response.json()
+            assert "failed to reset password" in data["error"].lower()
+
+        app.dependency_overrides.clear()
+
+    @pytest.mark.asyncio
+    async def test_reset_password_missing_token(self, client: AsyncClient):
+        """Test reset password with missing token field."""
+        reset_data = {"new_password": "NewPassword123"}
+        response = await client.post("/api/v1/auth/reset-password", json=reset_data)
+
+        # Should return 422 for validation error
+        assert response.status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_reset_password_missing_password(self, client: AsyncClient):
+        """Test reset password with missing new_password field."""
+        reset_data = {"token": "some_token"}
+        response = await client.post("/api/v1/auth/reset-password", json=reset_data)
+
+        # Should return 422 for validation error
+        assert response.status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_reset_password_empty_token(self, client: AsyncClient):
+        """Test reset password with empty token."""
+        reset_data = {"token": "", "new_password": "NewPassword123"}
+        response = await client.post("/api/v1/auth/reset-password", json=reset_data)
+
+        assert response.status_code == 400
+        data = response.json()
+        assert "invalid" in data["error"].lower()
+
+    @pytest.mark.asyncio
+    async def test_reset_password_empty_new_password(self, client: AsyncClient):
+        """Test reset password with empty new password."""
+        reset_data = {"token": "valid_token", "new_password": ""}
+        response = await client.post("/api/v1/auth/reset-password", json=reset_data)
+
+        assert response.status_code == 400
+        data = response.json()
+        assert "invalid" in data["error"].lower()
+
+    @pytest.mark.asyncio
+    async def test_reset_password_clears_all_sessions(self):
+        """Test that password reset clears all user sessions."""
+        from datetime import datetime, timedelta
+        from unittest.mock import AsyncMock, Mock
+
+        import bcrypt
+        from httpx import AsyncClient
+
+        from app.core.database import get_db
+        from app.main import app
+        from app.models.users import PasswordResetToken, Session, User
+
+        mock_session = AsyncMock()
+
+        # Create user
+        existing_user = User(
+            id=1,
+            email="reset@example.com",
+            password_hash=bcrypt.hashpw(
+                "OldPassword123".encode("utf-8"), bcrypt.gensalt()
+            ).decode("utf-8"),
+        )
+
+        # Create valid reset token
+        reset_token = PasswordResetToken(
+            id=1,
+            user_id=1,
+            token_hash="valid_token",
+            expires_at=datetime.utcnow() + timedelta(hours=1),
+            used_at=None,
+        )
+
+        # Create multiple user sessions
+        user_sessions = [
+            Session(id=1, user_id=1, token="session1"),
+            Session(id=2, user_id=1, token="session2"),
+            Session(id=3, user_id=1, token="session3"),
+        ]
+
+        def mock_execute(query):
+            mock_result = Mock()
+            query_str = str(query)
+
+            if (
+                "password_reset_tokens" in query_str.lower()
+                and "token_hash" in query_str.lower()
+            ):
+                mock_result.scalar.return_value = reset_token
+            elif "users" in query_str.lower() and "users.id" in query_str.lower():
+                mock_result.scalar.return_value = existing_user
+            elif "sessions" in query_str.lower() and "user_id" in query_str.lower():
+                mock_result.scalars.return_value.all.return_value = user_sessions
+            else:
+                mock_result.scalar.return_value = None
+
+            return mock_result
+
+        mock_session.execute.side_effect = mock_execute
+        mock_session.commit = AsyncMock()
+        mock_session.delete = AsyncMock()
+
+        async def override_get_db():
+            yield mock_session
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            reset_data = {"token": "valid_token", "new_password": "NewPassword123"}
+            response = await client.post("/api/v1/auth/reset-password", json=reset_data)
+
+            assert response.status_code == 200
+
+            # Verify all sessions were deleted
+            assert mock_session.delete.call_count == 2  # sessions + reset token
+
+            # Verify commit was called
+            mock_session.commit.assert_called()
+
+        app.dependency_overrides.clear()

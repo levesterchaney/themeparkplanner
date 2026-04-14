@@ -180,3 +180,6 @@ docker-compose.override.yml
 
 # Claude Code configuration
 CLAUDE.md
+
+# Miscellaneous
+frontent/.swc

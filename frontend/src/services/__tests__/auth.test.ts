@@ -107,4 +107,113 @@ describe('AuthService', () => {
       await expect(authService.logout()).rejects.toThrow('Logout failed');
     });
   });
+
+  describe('sendPasswordReset', () => {
+    test('calls correct endpoint with email', async () => {
+      const email = 'user@example.com';
+
+      mockApiClient.post.mockResolvedValue({
+        message: 'Password reset email sent successfully',
+      });
+
+      const result = await authService.sendPasswordReset(email);
+
+      expect(mockApiClient.post).toHaveBeenCalledWith(
+        '/api/v1/auth/forgot-password',
+        { email }
+      );
+      expect(result).toEqual({
+        message: 'Password reset email sent successfully',
+      });
+    });
+
+    test('handles password reset request error', async () => {
+      mockApiClient.post.mockRejectedValue(new Error('Email not found'));
+
+      await expect(
+        authService.sendPasswordReset('nonexistent@example.com')
+      ).rejects.toThrow('Email not found');
+    });
+  });
+
+  describe('resetPassword', () => {
+    test('calls correct endpoint with token and new password', async () => {
+      const token = 'reset-token-123';
+      const newPassword = 'NewPassword123';
+
+      mockApiClient.post.mockResolvedValue({
+        message: 'Password reset successfully',
+      });
+
+      const result = await authService.resetPassword(token, newPassword);
+
+      expect(mockApiClient.post).toHaveBeenCalledWith(
+        '/api/v1/auth/reset-password',
+        { token, newPassword }
+      );
+      expect(result).toEqual({
+        message: 'Password reset successfully',
+      });
+    });
+
+    test('handles invalid token error', async () => {
+      const token = 'invalid-token';
+      const newPassword = 'NewPassword123';
+
+      mockApiClient.post.mockRejectedValue(
+        new Error('Invalid or expired reset token')
+      );
+
+      await expect(
+        authService.resetPassword(token, newPassword)
+      ).rejects.toThrow('Invalid or expired reset token');
+    });
+
+    test('handles empty token', async () => {
+      const token = '';
+      const newPassword = 'NewPassword123';
+
+      mockApiClient.post.mockResolvedValue({
+        message: 'Password reset successfully',
+      });
+
+      const result = await authService.resetPassword(token, newPassword);
+
+      expect(mockApiClient.post).toHaveBeenCalledWith(
+        '/api/v1/auth/reset-password',
+        { token: '', newPassword }
+      );
+      expect(result).toEqual({
+        message: 'Password reset successfully',
+      });
+    });
+
+    test('handles network error during reset', async () => {
+      const token = 'valid-token';
+      const newPassword = 'NewPassword123';
+
+      mockApiClient.post.mockRejectedValue(new Error('Network error'));
+
+      await expect(
+        authService.resetPassword(token, newPassword)
+      ).rejects.toThrow('Network error');
+    });
+
+    test('handles server error response', async () => {
+      const token = 'valid-token';
+      const newPassword = 'weak';
+
+      mockApiClient.post.mockRejectedValue({
+        status: 400,
+        message: 'Password does not meet requirements',
+      });
+
+      await expect(
+        authService.resetPassword(token, newPassword)
+      ).rejects.toEqual({
+        status: 400,
+        message: 'Password does not meet requirements',
+      });
+    });
+  });
 });
