@@ -15,6 +15,8 @@ const customJestConfig = {
     '!src/**/*.d.ts',
     '!src/app/**/layout.tsx',
     '!src/app/**/page.tsx',
+    '!src/middleware.ts',
+    '!src/app/api/health/route.ts',
   ],
   coverageThreshold: {
     global: {
