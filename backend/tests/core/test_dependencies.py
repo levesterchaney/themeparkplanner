@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -34,9 +34,10 @@ class TestGetCurrentUser:
             id=1,
             user_id=1,
             token="valid_token_123",
-            expires_at=datetime.utcnow() + timedelta(hours=1),
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
         )
-        mock_session.is_expired = False
+        # Set expires_at to future date so is_expired returns False
+        mock_session.expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
 
         # Mock database queries
         def mock_execute(query):
@@ -136,9 +137,8 @@ class TestGetCurrentUser:
             id=1,
             user_id=1,
             token="expired_token",
-            expires_at=datetime.utcnow() - timedelta(hours=1),
+            expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
         )
-        expired_session.is_expired = True
 
         # Mock database query returning expired session
         def mock_execute(query):
@@ -173,9 +173,10 @@ class TestGetCurrentUser:
             id=1,
             user_id=999,  # Non-existent user ID
             token="orphaned_session",
-            expires_at=datetime.utcnow() + timedelta(hours=1),
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
         )
-        mock_session.is_expired = False
+        # Set expires_at to future date so is_expired returns False
+        mock_session.expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
 
         # Mock database queries
         def mock_execute(query):
@@ -256,9 +257,10 @@ class TestGetCurrentUser:
             id=1,
             user_id=1,
             token="duplicate_token",
-            expires_at=datetime.utcnow() + timedelta(hours=1),
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
         )
-        mock_session.is_expired = False
+        # Set expires_at to future date so is_expired returns False
+        mock_session.expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
 
         # Mock database queries
         def mock_execute(query):
@@ -298,9 +300,8 @@ class TestDependenciesIntegration:
             id=1,
             user_id=1,
             token="expired_token",
-            expires_at=datetime.utcnow() - timedelta(hours=2),
+            expires_at=datetime.now(timezone.utc) - timedelta(hours=2),
         )
-        expired_session.is_expired = True
 
         # Mock database query returning expired session
         def mock_execute(query):
@@ -353,8 +354,12 @@ class TestDependenciesIntegration:
         mock_request_expired = Mock(spec=Request)
         mock_request_expired.cookies = {"session_token": "expired"}
 
-        expired_session = Session(id=1, user_id=1, token="expired")
-        expired_session.is_expired = True
+        expired_session = Session(
+            id=1,
+            user_id=1,
+            token="expired",
+            expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
+        )
 
         def mock_execute_expired(query):
             mock_result = Mock()
@@ -372,7 +377,7 @@ class TestDependenciesIntegration:
         mock_request_user_not_found.cookies = {"session_token": "valid_token"}
 
         valid_session = Session(id=1, user_id=999, token="valid_token")
-        valid_session.is_expired = False
+        valid_session.expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
 
         def mock_execute_user_not_found(query):
             mock_result = Mock()

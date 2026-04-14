@@ -5,6 +5,13 @@ from .config import settings
 
 
 class Base(DeclarativeBase):
+    """
+    SQLAlchemy declarative base class for all database models.
+
+    This is the base class that all database models inherit from.
+    It provides the basic SQLAlchemy ORM functionality and table creation.
+    """
+
     pass
 
 
@@ -23,6 +30,20 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 async def get_db() -> AsyncSession:
+    """
+    Database dependency for FastAPI dependency injection.
+
+    Creates and manages database sessions for request handling.
+    Ensures proper session cleanup and connection management.
+
+    Yields:
+        AsyncSession: Database session for the current request
+
+    Note:
+        This function is used as a FastAPI dependency to provide
+        database sessions to API endpoints. The session is automatically
+        closed after the request completes.
+    """
     async with AsyncSessionLocal() as session:
         try:
             yield session

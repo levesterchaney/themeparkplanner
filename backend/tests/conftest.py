@@ -84,9 +84,8 @@ async def mock_db_with_login_user():
         id=1, email="login@example.com", password_hash=password_hash.decode("utf-8")
     )
 
-    # Create a session for logout tests
+    # Create a session for logout tests (expires_at=None means it never expires)
     user_session = Session(id=1, user_id=1, token="test_session_token", expires_at=None)
-    user_session.is_expired = False
 
     # Mock execute to return appropriate objects based on query
     def mock_execute(query):
