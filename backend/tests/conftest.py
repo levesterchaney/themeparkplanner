@@ -86,6 +86,7 @@ async def mock_db_with_login_user():
 
     # Create a session for logout tests
     user_session = Session(id=1, user_id=1, token="test_session_token", expires_at=None)
+    user_session.is_expired = False
 
     # Mock execute to return appropriate objects based on query
     def mock_execute(query):
@@ -95,11 +96,17 @@ async def mock_db_with_login_user():
         if "sessions.token" in query_str.lower():
             # This is a session lookup
             mock_result.scalar.return_value = user_session
+            mock_result.scalars.return_value.first.return_value = user_session
         elif "users.email" in query_str.lower():
             # This is a user lookup
             mock_result.scalar.return_value = login_user
+            mock_result.scalars.return_value.first.return_value = login_user
+        elif "users.id" in query_str.lower():
+            # This is a user lookup by ID (from get_current_user)
+            mock_result.scalars.return_value.first.return_value = login_user
         else:
             mock_result.scalar.return_value = None
+            mock_result.scalars.return_value.first.return_value = None
 
         return mock_result
 

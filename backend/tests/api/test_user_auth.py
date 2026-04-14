@@ -184,8 +184,8 @@ class TestUserLogout:
         response = await client.post("/api/v1/auth/logout")
         assert response.status_code == 401
         data = response.json()
-        assert "error" in data
-        assert "session token" in data["error"].lower()
+        assert "detail" in data
+        assert "session token" in data["detail"].lower()
 
     @pytest.mark.asyncio
     async def test_logout_user_invalid_session_token(self):
@@ -212,8 +212,11 @@ class TestUserLogout:
             )
             assert response.status_code == 401
             data = response.json()
-            assert "error" in data
-            assert "invalid session" in data["error"].lower()
+            assert "detail" in data
+            assert (
+                "invalid" in data["detail"].lower()
+                or "session" in data["detail"].lower()
+            )
 
         app.dependency_overrides.clear()
 

@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.dependencies import get_current_user
 from app.models import PasswordResetToken, Session, User, UserPreference
 from app.services.email import send_email
 
@@ -169,41 +170,45 @@ async def login_user(
 
 @router.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout_user(
-    request: Request, response: Response, db: AsyncSession = Depends(get_db)
+    request: Request,
+    response: Response,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     User logout endpoint.
 
-    Deletes the user's session based on the session token cookie. The session token is
-    removed from the response cookies.
+    Deletes the user's current session based on the session token cookie.
+    The session token is removed from the response cookies. This is a protected
+    endpoint that requires valid authentication.
+
+    Args:
+        request: FastAPI request object containing cookies
+        response: FastAPI response object for cookie manipulation
+        current_user: Authenticated user from session (via dependency)
+        db: Database session dependency
 
     Returns:
         204 No Content on successful logout
-        401 Unauthorized if the session token is missing or invalid
+        401 Unauthorized if the session token is missing, invalid, or expired
     """
     session_token = request.cookies.get("session_token")
-    if not session_token:
-        response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {"error": "No session token provided"}
 
+    # Find and delete the current session
     session_result = await db.execute(
         select(Session).where(Session.token == session_token)
     )
-    session = session_result.scalar()
+    session = session_result.scalars().first()
 
-    if session is None:
-        response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {"error": "Invalid session token"}
-
-    try:
+    if session:
         await db.delete(session)
         await db.commit()
-        response.delete_cookie(key="session_token")
-    except Exception:
-        response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-        return {"error": "User logout failed"}
 
-    return {"message": "Logout successful"}
+    # Clear the session cookie regardless
+    response.delete_cookie(key="session_token")
+
+    # Return 204 No Content (no body for successful logout)
+    return
 
 
 @router.post("/auth/forgot-password", status_code=status.HTTP_200_OK)
