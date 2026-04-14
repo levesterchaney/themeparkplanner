@@ -1,5 +1,5 @@
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import bcrypt
@@ -97,7 +97,7 @@ async def register_user(
         user_session = Session(
             user_id=new_user.id,
             token=secrets.token_urlsafe(32),
-            expires_at=datetime.utcnow()
+            expires_at=datetime.now(timezone.utc)
             + timedelta(days=settings.session_timeout_days),
         )
         db.add(user_session)
@@ -147,7 +147,7 @@ async def login_user(
         user_session = Session(
             user_id=user.id,
             token=secrets.token_urlsafe(32),
-            expires_at=datetime.utcnow()
+            expires_at=datetime.now(timezone.utc)
             + timedelta(days=settings.session_timeout_days),
         )
         db.add(user_session)
@@ -241,7 +241,7 @@ async def forgot_password(
     try:
         # Generate a password reset token
         reset_token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(
+        expires_at = datetime.now(timezone.utc) + timedelta(
             hours=settings.password_reset_token_expiration_hours
         )
 
@@ -302,7 +302,7 @@ async def reset_password(
 
     if (
         reset_token is None
-        or reset_token.expires_at < datetime.utcnow()
+        or reset_token.expires_at < datetime.now(timezone.utc)
         or reset_token.used_at is not None
     ):
         response.status_code = status.HTTP_400_BAD_REQUEST

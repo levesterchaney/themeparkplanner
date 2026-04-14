@@ -370,7 +370,7 @@ class TestForgotPassword:
         self, mock_db_with_login_user: AsyncMock
     ):
         """Test that password reset tokens are generated properly."""
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         from unittest.mock import patch
 
         from httpx import AsyncClient
@@ -401,8 +401,10 @@ class TestForgotPassword:
                 assert added_token.user_id == 1
                 assert added_token.token_hash is not None
                 assert len(added_token.token_hash) > 10  # Token should be substantial
-                assert added_token.expires_at > datetime.utcnow()
-                assert added_token.expires_at <= datetime.utcnow() + timedelta(hours=2)
+                assert added_token.expires_at > datetime.now(timezone.utc)
+                assert added_token.expires_at <= datetime.now(timezone.utc) + timedelta(
+                    hours=2
+                )
 
         app.dependency_overrides.clear()
 
@@ -460,7 +462,7 @@ class TestResetPassword:
     @pytest.mark.asyncio
     async def test_reset_password_success(self):
         """Test successful password reset with valid token."""
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         from unittest.mock import AsyncMock, Mock
 
         import bcrypt
@@ -487,7 +489,7 @@ class TestResetPassword:
             id=1,
             user_id=1,
             token_hash="valid_reset_token",
-            expires_at=datetime.utcnow() + timedelta(hours=1),
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
             used_at=None,
         )
 
@@ -561,7 +563,7 @@ class TestResetPassword:
     @pytest.mark.asyncio
     async def test_reset_password_expired_token(self):
         """Test reset password with expired token."""
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         from unittest.mock import AsyncMock, Mock
 
         from httpx import AsyncClient
@@ -577,7 +579,7 @@ class TestResetPassword:
             id=1,
             user_id=1,
             token_hash="expired_token",
-            expires_at=datetime.utcnow() - timedelta(hours=1),  # Expired
+            expires_at=datetime.now(timezone.utc) - timedelta(hours=1),  # Expired
             used_at=None,
         )
 
@@ -615,7 +617,7 @@ class TestResetPassword:
     @pytest.mark.asyncio
     async def test_reset_password_used_token(self):
         """Test reset password with already used token."""
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         from unittest.mock import AsyncMock, Mock
 
         from httpx import AsyncClient
@@ -631,8 +633,8 @@ class TestResetPassword:
             id=1,
             user_id=1,
             token_hash="used_token",
-            expires_at=datetime.utcnow() + timedelta(hours=1),
-            used_at=datetime.utcnow() - timedelta(minutes=30),  # Already used
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
+            used_at=datetime.now(timezone.utc) - timedelta(minutes=30),  # Already used
         )
 
         def mock_execute(query):
@@ -669,7 +671,7 @@ class TestResetPassword:
     @pytest.mark.asyncio
     async def test_reset_password_user_not_found(self):
         """Test reset password when user is deleted after token creation."""
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         from unittest.mock import AsyncMock, Mock
 
         from httpx import AsyncClient
@@ -685,7 +687,7 @@ class TestResetPassword:
             id=1,
             user_id=999,  # Non-existent user
             token_hash="orphaned_token",
-            expires_at=datetime.utcnow() + timedelta(hours=1),
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
             used_at=None,
         )
 
@@ -725,7 +727,7 @@ class TestResetPassword:
     @pytest.mark.asyncio
     async def test_reset_password_database_failure(self):
         """Test reset password when database operation fails."""
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         from unittest.mock import AsyncMock, Mock
 
         import bcrypt
@@ -750,7 +752,7 @@ class TestResetPassword:
             id=1,
             user_id=1,
             token_hash="valid_token",
-            expires_at=datetime.utcnow() + timedelta(hours=1),
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
             used_at=None,
         )
 
@@ -833,7 +835,7 @@ class TestResetPassword:
     @pytest.mark.asyncio
     async def test_reset_password_clears_all_sessions(self):
         """Test that password reset clears all user sessions."""
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         from unittest.mock import AsyncMock, Mock
 
         import bcrypt
@@ -859,7 +861,7 @@ class TestResetPassword:
             id=1,
             user_id=1,
             token_hash="valid_token",
-            expires_at=datetime.utcnow() + timedelta(hours=1),
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
             used_at=None,
         )
 
