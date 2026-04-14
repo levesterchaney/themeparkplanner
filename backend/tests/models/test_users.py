@@ -136,7 +136,7 @@ class TestPasswordResetToken:
         """Test basic password reset token creation."""
         token = PasswordResetToken(
             user_id=1,
-            token="reset_token_123",
+            token_hash="reset_token_123",
             expires_at=datetime.now() + timedelta(hours=1),
         )
 
@@ -148,7 +148,7 @@ class TestPasswordResetToken:
         """Test password reset token expiration check when expired."""
         token = PasswordResetToken(
             user_id=1,
-            token="reset_token_123",
+            token_hash="reset_token_123",
             expires_at=datetime.now() - timedelta(hours=1),  # Expired
         )
 
@@ -158,7 +158,7 @@ class TestPasswordResetToken:
         """Test password reset token expiration check when not expired."""
         token = PasswordResetToken(
             user_id=1,
-            token="reset_token_123",
+            token_hash="reset_token_123",
             expires_at=datetime.now() + timedelta(hours=1),  # Not expired
         )
 
