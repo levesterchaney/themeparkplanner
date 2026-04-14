@@ -141,7 +141,7 @@ describe('ForgotPasswordForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+      expect(screen.getByText(/network error/i)).toBeInTheDocument();
     });
 
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
@@ -167,7 +167,7 @@ describe('ForgotPasswordForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+      expect(screen.getByText(/network error/i)).toBeInTheDocument();
     });
 
     await user.clear(emailInput);

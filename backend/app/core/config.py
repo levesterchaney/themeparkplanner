@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     db_port: int = os.getenv("DB_PORT", 5432)
     db_name: str = os.getenv("DB_NAME", "themeparkplanner")
 
-    database_pool_size: int = 10
-    database_max_overflow: int = 20
+    database_pool_size: int = int(os.getenv("DATABASE_POOL_SIZE", "10"))
+    database_max_overflow: int = int(os.getenv("DATABASE_MAX_OVERFLOW", "20"))
 
     @computed_field
     @property
@@ -26,20 +26,28 @@ class Settings(BaseSettings):
         )
 
     # Redis
-    redis_url: str = "redis://localhost:6379"
-    redis_max_connections: int = 10
+    redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379")
+    redis_max_connections: int = int(os.getenv("REDIS_MAX_CONNECTIONS", "10"))
 
     # API
     api_v1_str: str = "/api/v1"
     project_name: str = "Theme Park Planner API"
 
+    # Session Management
+    session_timeout_days: int = int(os.getenv("SESSION_TIMEOUT_DAYS", "30"))
+    password_reset_token_expiration_hours: int = int(
+        os.getenv("PASSWORD_RESET_TOKEN_EXPIRATION_HOURS", "1")
+    )
+
     # Security
-    secret_key: str = "your-secret-key-change-in-production"
-    access_token_expire_minutes: int = 30
+    secret_key: str = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
+    access_token_expire_minutes: int = int(
+        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
+    )
 
     # Environment
-    environment: str = "development"
-    debug: bool = True
+    environment: str = os.getenv("ENVIRONMENT", "development")
+    debug: bool = os.getenv("DEBUG", "True").lower() == "true"
 
     # Email
     mail_username: str = os.getenv("MAIL_USERNAME")
@@ -54,8 +62,8 @@ class Settings(BaseSettings):
     validate_certs: bool = os.getenv("VALIDATE_CERTS", "True").lower() == "true"
 
     # Frontend
-    frontend_host: str = "http://localhost"
-    frontend_port: str = "3000"
+    frontend_host: str = os.getenv("FRONTEND_HOST", "http://localhost")
+    frontend_port: str = os.getenv("FRONTEND_PORT", "3000")
 
     @computed_field
     @property

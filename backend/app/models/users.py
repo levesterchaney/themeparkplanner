@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import validates
@@ -114,3 +116,8 @@ class PasswordResetToken(Base):
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+    @property
+    def is_expired(self) -> bool:
+        """Check if the password reset token has expired."""
+        return self.expires_at < datetime.utcnow()

@@ -13,9 +13,6 @@ from app.core.database import get_db
 from app.models import PasswordResetToken, Session, User, UserPreference
 from app.services.email import send_email
 
-SESSION_TIMEOUT_DAYS = 30  # 30 days
-PASSWORD_RESET_TOKEN_EXPIRATION_HOURS = 1  # 1 hour
-
 router = APIRouter()
 
 
@@ -33,6 +30,11 @@ class UserLoginData(BaseModel):
 
 class ForgotPasswordData(BaseModel):
     email: str
+
+
+class ResetPasswordData(BaseModel):
+    token: str
+    new_password: str
 
 
 @router.post("/auth/register", status_code=status.HTTP_201_CREATED)
@@ -94,7 +96,8 @@ async def register_user(
         user_session = Session(
             user_id=new_user.id,
             token=secrets.token_urlsafe(32),
-            expires_at=datetime.utcnow() + timedelta(days=SESSION_TIMEOUT_DAYS),
+            expires_at=datetime.utcnow()
+            + timedelta(days=settings.session_timeout_days),
         )
         db.add(user_session)
         await db.flush()  # Ensure user_session.id is populated
@@ -143,7 +146,8 @@ async def login_user(
         user_session = Session(
             user_id=user.id,
             token=secrets.token_urlsafe(32),
-            expires_at=datetime.utcnow() + timedelta(days=SESSION_TIMEOUT_DAYS),
+            expires_at=datetime.utcnow()
+            + timedelta(days=settings.session_timeout_days),
         )
         db.add(user_session)
         await db.flush()
@@ -233,7 +237,7 @@ async def forgot_password(
         # Generate a password reset token
         reset_token = secrets.token_urlsafe(32)
         expires_at = datetime.utcnow() + timedelta(
-            hours=PASSWORD_RESET_TOKEN_EXPIRATION_HOURS
+            hours=settings.password_reset_token_expiration_hours
         )
 
         # Store the reset token in the database
@@ -265,3 +269,65 @@ async def forgot_password(
         return {"error": "Failed to process forgot password request"}
 
     return {"message": default_msg}
+
+
+@router.post("/auth/reset-password", status_code=status.HTTP_200_OK)
+async def reset_password(
+    reset_data: ResetPasswordData,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Reset password endpoint.
+
+    Resets the user's password if the provided reset token is valid and not expired.
+    The new password is hashed and stored in the database.
+
+    Returns:
+        200 OK on successful password reset
+        400 Bad Request if the token is invalid or expired
+        422 if there are validation errors
+    """
+    token_result = await db.execute(
+        select(PasswordResetToken).where(
+            PasswordResetToken.token_hash == reset_data.token
+        )
+    )
+    reset_token = token_result.scalar()
+
+    if (
+        reset_token is None
+        or reset_token.expires_at < datetime.utcnow()
+        or reset_token.used_at is not None
+    ):
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return {"error": "Reset token is either invalid, expired, or was already used."}
+
+    user_result = await db.execute(select(User).where(User.id == reset_token.user_id))
+    user = user_result.scalar()
+
+    if user is None:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return {"error": "User not found"}
+
+    user_sessions = await db.execute(select(Session).where(Session.user_id == user.id))
+
+    try:
+        # Hash the new password and update the user's password hash
+        new_password_hash = bcrypt.hashpw(
+            reset_data.new_password.encode("utf-8"), bcrypt.gensalt()
+        ).decode("utf-8")
+        user.password_hash = new_password_hash
+
+        # Clear all existing sessions for the user
+        sessions = user_sessions.scalars().all()
+        await db.delete(sessions)
+
+        # Delete the used password reset token
+        await db.delete(reset_token)
+        await db.commit()
+    except Exception:
+        response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        return {"error": "Failed to reset password"}
+
+    return {"message": "Password reset successful"}

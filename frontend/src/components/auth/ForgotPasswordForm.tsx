@@ -24,7 +24,12 @@ export default function ForgotPasswordForm() {
       );
     } catch (error: unknown) {
       console.log('Error sending password reset link:', error);
-      setError('Something went wrong.');
+      const errorMessage =
+        (error as { details?: { error?: string }; message?: string })?.details
+          ?.error ||
+        (error as { message?: string })?.message ||
+        'Something went wrong.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
