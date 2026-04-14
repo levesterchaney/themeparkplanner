@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -9,6 +9,24 @@ from app.core.database import Base
 
 
 class User(Base):
+    """
+    User account model for the theme park planner application.
+
+    Represents registered users with authentication credentials and profile
+    information. Users can have preferences, sessions, and password reset
+    tokens associated with them.
+
+    Attributes:
+        id: Primary key identifier
+        email: Unique email address for login and communication
+        first_name: User's first name (optional)
+        last_name: User's last name (optional)
+        avatar_url: URL to user's profile picture (optional)
+        password_hash: Bcrypt hash of user's password
+        created_at: Account creation timestamp
+        updated_at: Last modification timestamp
+    """
+
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -29,6 +47,22 @@ class User(Base):
 
 
 class UserPreference(Base):
+    """
+    User preference model for customizing theme park experiences.
+
+    Stores user-specific preferences that influence trip planning recommendations,
+    attraction suggestions, and accessibility accommodations.
+
+    Attributes:
+        id: Primary key identifier
+        user_id: Foreign key reference to the User
+        default_party_size: Default number of people in user's group (minimum 1)
+        has_kids: Whether the user typically travels with children
+        thrill_level: User's preferred intensity level for attractions
+        accessibility_needs: List of accessibility accommodations required
+        dietary_restrictions: List of dietary restrictions for dining recommendations
+    """
+
     __tablename__ = "user_preferences"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -41,6 +75,19 @@ class UserPreference(Base):
 
     @validates("thrill_level")
     def validate_thrill_level(self, key, value):
+        """
+        Validate thrill level preference.
+
+        Args:
+            key: The column name being validated
+            value: The thrill level value to validate
+
+        Returns:
+            str: The validated thrill level value
+
+        Raises:
+            ValueError: If thrill level is not in allowed values
+        """
         if value is None:
             return value
         allowed_levels = ["low", "moderate", "high", "extreme"]
@@ -50,6 +97,19 @@ class UserPreference(Base):
 
     @validates("accessibility_needs")
     def validate_accessibility_needs(self, key, value):
+        """
+        Validate accessibility needs list.
+
+        Args:
+            key: The column name being validated
+            value: List of accessibility needs to validate
+
+        Returns:
+            list: The validated accessibility needs list
+
+        Raises:
+            ValueError: If any accessibility need is not recognized
+        """
         if value is None:
             return value
         allowed_needs = [
@@ -67,6 +127,19 @@ class UserPreference(Base):
 
     @validates("dietary_restrictions")
     def validate_dietary_restrictions(self, key, value):
+        """
+        Validate dietary restrictions list.
+
+        Args:
+            key: The column name being validated
+            value: List of dietary restrictions to validate
+
+        Returns:
+            list: The validated dietary restrictions list
+
+        Raises:
+            ValueError: If any dietary restriction is not recognized
+        """
         if value is None:
             return value
         allowed_restrictions = [
@@ -88,6 +161,21 @@ class UserPreference(Base):
 
 
 class Session(Base):
+    """
+    User authentication session model.
+
+    Represents an active user session with token-based authentication.
+    Sessions have expiration times and track user activity for security.
+
+    Attributes:
+        id: Primary key identifier
+        user_id: Foreign key reference to the User
+        token: Unique session token for authentication
+        expires_at: Session expiration timestamp
+        last_active_at: Timestamp of last user activity
+        created_at: Session creation timestamp
+    """
+
     __tablename__ = "sessions"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -104,8 +192,36 @@ class Session(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
+    @property
+    def is_expired(self) -> bool:
+        """
+        Check if the session has expired.
+
+        Returns:
+            bool: True if the session has expired, False otherwise.
+                  Returns False if expires_at is None (never expires).
+        """
+        if self.expires_at is None:
+            return False
+        return self.expires_at < datetime.now(timezone.utc)
+
 
 class PasswordResetToken(Base):
+    """
+    Password reset token model for secure password recovery.
+
+    Represents time-limited tokens used for password reset functionality.
+    Tokens are hashed for security and can only be used once.
+
+    Attributes:
+        id: Primary key identifier
+        user_id: Foreign key reference to the User
+        token_hash: Hashed version of the reset token
+        expires_at: Token expiration timestamp (typically 1-2 hours)
+        used_at: Timestamp when token was used (null if unused)
+        created_at: Token creation timestamp
+    """
+
     __tablename__ = "password_reset_tokens"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -119,5 +235,10 @@ class PasswordResetToken(Base):
 
     @property
     def is_expired(self) -> bool:
-        """Check if the password reset token has expired."""
-        return self.expires_at < datetime.utcnow()
+        """
+        Check if the password reset token has expired.
+
+        Returns:
+            bool: True if the password reset token has expired, False otherwise
+        """
+        return self.expires_at < datetime.now(timezone.utc)

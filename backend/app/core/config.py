@@ -5,6 +5,20 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    """
+    Application configuration settings.
+
+    Manages environment variables and configuration for the theme park planner API.
+    Uses Pydantic for validation and type conversion. Settings are loaded from
+    environment variables with sensible defaults for development.
+
+    Configuration Categories:
+        - Database: PostgreSQL connection and pool settings
+        - Redis: Cache and session storage settings
+        - Application: Debug mode, API versioning, session management
+        - Email: SMTP configuration for notifications
+    """
+
     # Database
     db_driver: str = os.getenv("DB_DRIVER", "postgresql+asyncpg")
     db_user: str = os.getenv("DB_USER", "tppdev")

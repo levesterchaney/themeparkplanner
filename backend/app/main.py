@@ -11,6 +11,24 @@ from .core.redis import redis_client
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Application lifespan context manager.
+
+    Handles startup and shutdown events for the FastAPI application.
+    Manages Redis connection lifecycle and any other resources that need
+    initialization and cleanup.
+
+    Args:
+        app: FastAPI application instance
+
+    Yields:
+        None: Control to the application during runtime
+
+    Note:
+        This function is called automatically by FastAPI during application
+        startup and shutdown. Resources initialized here are available
+        throughout the application lifecycle.
+    """
     # Startup
     await redis_client.init_redis()
     yield

@@ -4,12 +4,13 @@ A FastAPI-based backend service for planning theme park visits with real-time da
 
 ## 🚀 Features
 
-- **User Authentication** - Registration, login, logout with secure session management
+- **Complete Authentication System** - Registration, login, logout, and password reset with email integration
+- **Password Recovery** - Secure token-based password reset with email notifications
 - **User Preferences** - Customizable settings for party size, thrill levels, dietary restrictions
 - **Health Monitoring** - Database and Redis health checks with detailed status
 - **API Documentation** - Auto-generated OpenAPI/Swagger documentation
 - **Database Migrations** - Alembic-based schema management
-- **Comprehensive Testing** - Unit tests with coverage reporting
+- **Comprehensive Testing** - 55 tests passing with 89% coverage
 
 ## 🏗️ Architecture
 
@@ -17,11 +18,24 @@ A FastAPI-based backend service for planning theme park visits with real-time da
 backend/
 ├── app/
 │   ├── api/           # API route handlers
+│   │   ├── health.py  # Health check endpoints
+│   │   └── user_auth.py # Authentication endpoints
 │   ├── core/          # Configuration, database, Redis
+│   │   ├── config.py  # Application configuration
+│   │   ├── database.py # Database connection setup
+│   │   └── redis.py   # Redis client configuration
 │   ├── models/        # SQLAlchemy database models
+│   │   ├── users.py   # User, Session, PasswordResetToken models
+│   │   ├── trips.py   # Trip planning models
+│   │   └── parks.py   # Theme park data models
+│   ├── services/      # Business logic services
+│   │   └── email.py   # Email service for notifications
 │   └── main.py        # FastAPI application entry point
 ├── alembic/           # Database migration files
 ├── tests/             # Unit and integration tests
+│   ├── api/          # API endpoint tests
+│   ├── models/       # Model tests
+│   └── conftest.py   # Test configuration
 └── requirements.txt   # Python dependencies
 ```
 
@@ -112,6 +126,8 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 | `/api/v1/auth/register` | POST | User registration |
 | `/api/v1/auth/login` | POST | User login |
 | `/api/v1/auth/logout` | POST | User logout |
+| `/api/v1/auth/forgot-password` | POST | Request password reset email |
+| `/api/v1/auth/reset-password` | POST | Reset password with token |
 | `/` | GET | API information |
 
 ### Authentication Flow
@@ -134,7 +150,21 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    }
    ```
 
-3. **Session**: Secure HTTP-only cookies automatically handle authentication
+3. **Password Reset**: `POST /api/v1/auth/forgot-password` then `POST /api/v1/auth/reset-password`
+   ```json
+   // Request reset email
+   {
+     "email": "user@example.com"
+   }
+
+   // Reset password with token
+   {
+     "token": "secure_reset_token_from_email",
+     "newPassword": "NewSecurePassword123"
+   }
+   ```
+
+4. **Session**: Secure HTTP-only cookies automatically handle authentication
 
 ## 🗄️ Database Schema
 
@@ -170,16 +200,14 @@ alembic history
 pytest
 
 # Run with coverage
-pytest --cov=app --cov-report=html
+python3 -m pytest tests/ --cov=app --cov-report=html
+# Current status: 55 tests passing, 89% coverage
 
 # Run specific test file
-pytest tests/api/test_user_auth.py
+python3 -m pytest tests/api/test_user_auth.py -v
 
-# Run tests in watch mode (requires pytest-watch)
-pytest-watch
-
-# Using test runner script
-./run_tests.sh coverage
+# Run specific test class
+python3 -m pytest -k "TestResetPassword" -v
 ```
 
 ### Test Structure
@@ -188,9 +216,19 @@ pytest-watch
 tests/
 ├── conftest.py           # Test configuration and fixtures
 ├── api/
-│   ├── test_health.py    # Health endpoint tests
-│   └── test_user_auth.py # Authentication tests
-└── models/               # Model tests (future)
+│   ├── test_health.py    # Health endpoint tests (8 tests)
+│   └── test_user_auth.py # Authentication tests (28 tests)
+│       ├── TestUserRegistration    # Registration endpoint tests
+│       ├── TestUserLogin          # Login endpoint tests
+│       ├── TestUserLogout         # Logout endpoint tests
+│       ├── TestForgotPassword     # Password reset request tests
+│       └── TestResetPassword      # Password reset completion tests
+└── models/               # Model tests
+    └── test_users.py     # User model tests (19 tests)
+        ├── TestUser               # User model tests
+        ├── TestSession           # Session model tests
+        ├── TestUserPreference    # User preferences tests
+        └── TestPasswordResetToken # Password reset token tests
 ```
 
 ### Coverage Reports
@@ -374,6 +412,24 @@ curl -X POST "http://localhost:8000/api/v1/auth/login" \
      }'
 ```
 
+### Password Reset
+```bash
+# Request password reset
+curl -X POST "http://localhost:8000/api/v1/auth/forgot-password" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "email": "john@example.com"
+     }'
+
+# Reset password with token
+curl -X POST "http://localhost:8000/api/v1/auth/reset-password" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "token": "reset_token_from_email",
+       "newPassword": "NewSecurePassword123"
+     }'
+```
+
 ### Health Check
 ```bash
 curl -X GET "http://localhost:8000/api/v1/health"
@@ -434,11 +490,15 @@ DEBUG=true uvicorn app.main:app --reload
 ## 🎯 Roadmap
 
 ### Current Features ✅
-- User authentication system
-- Database migrations
-- Health monitoring
-- Comprehensive testing
-- API documentation
+- Complete user authentication system (register, login, logout)
+- Password reset flow with email integration
+- Token-based password recovery with expiration
+- Database migrations with Alembic
+- Health monitoring for database and Redis
+- Comprehensive testing (55 tests, 89% coverage)
+- Auto-generated API documentation
+- Secure session management with HTTP-only cookies
+- User preference management with validation
 
 ### Planned Features 🚧
 - Park data integration

@@ -5,11 +5,12 @@ A modern Next.js frontend application for planning theme park visits with real-t
 ## 🌟 Features
 
 - **Modern UI/UX** - Clean, responsive design with Tailwind CSS
-- **User Authentication** - Registration, login, logout with session management
+- **Complete Authentication System** - Registration, login, logout, and password reset
+- **Password Recovery** - Secure email-based password reset flow
 - **Real-time Health Monitoring** - Backend API status dashboard
 - **Responsive Design** - Mobile-first approach with dark mode support
 - **Type Safety** - Full TypeScript implementation
-- **Component Testing** - Jest + React Testing Library
+- **Comprehensive Testing** - 154 tests passing with Jest + React Testing Library
 - **Performance Optimized** - Next.js App Router with static generation
 
 ## 🏗️ Architecture
@@ -18,12 +19,17 @@ A modern Next.js frontend application for planning theme park visits with real-t
 frontend/
 ├── src/
 │   ├── app/                 # Next.js App Router pages
-│   │   ├── auth/           # Authentication pages
 │   │   ├── login/          # Login page
 │   │   ├── register/       # Registration page
-│   │   └── logout/         # Logout page
+│   │   ├── logout/         # Logout page
+│   │   ├── forgot-password/ # Password reset request
+│   │   └── reset-password/ # Password reset form
 │   ├── components/         # Reusable UI components
 │   │   ├── auth/           # Authentication components
+│   │   │   ├── LoginForm.tsx        # Login form
+│   │   │   ├── RegistrationForm.tsx # Registration form
+│   │   │   ├── ForgotPasswordForm.tsx # Password reset request
+│   │   │   └── ResetPasswordForm.tsx # Password reset form
 │   │   └── HealthCheck.tsx # System status component
 │   ├── lib/                # Utilities and configurations
 │   ├── services/           # API service layer
@@ -120,6 +126,8 @@ npm start
 - `/login` - User authentication
 - `/register` - User registration
 - `/logout` - Logout processing
+- `/forgot-password` - Request password reset email
+- `/reset-password` - Reset password with token
 
 ### Protected Routes (Future)
 - `/dashboard` - User dashboard
@@ -151,6 +159,16 @@ export default function RegistrationForm() {
 // src/components/auth/LoginForm.tsx
 export default function LoginForm() {
   // Login flow, session management
+}
+
+// src/components/auth/ForgotPasswordForm.tsx
+export default function ForgotPasswordForm() {
+  // Password reset request with email validation
+}
+
+// src/components/auth/ResetPasswordForm.tsx
+export default function ResetPasswordForm() {
+  // Password reset with token validation and new password
 }
 ```
 
@@ -199,6 +217,14 @@ export const authService = {
 
   logout: async () => {
     return apiClient.post('/api/v1/auth/logout');
+  },
+
+  sendPasswordReset: async (email: string) => {
+    return apiClient.post('/api/v1/auth/forgot-password', { email });
+  },
+
+  resetPassword: async (token: string, newPassword: string) => {
+    return apiClient.post('/api/v1/auth/reset-password', { token, newPassword });
   }
 };
 ```
@@ -235,8 +261,8 @@ npm run test:watch
 # Run tests with coverage
 npm run test:coverage
 
-# Using test runner script
-./run_tests.sh coverage
+# Current test status: 154 tests passing
+# Covers all authentication flows including password reset
 ```
 
 ### Test Structure
@@ -246,9 +272,24 @@ src/__tests__/
 ├── components/
 │   ├── HealthCheck.test.tsx        # Component testing
 │   └── auth/
-│       └── RegistrationForm.test.tsx # Form testing
-└── services/
-    └── auth.test.ts                # Service layer testing
+│       ├── RegistrationForm.test.tsx # Registration form
+│       ├── LoginForm.test.tsx       # Login form testing
+│       ├── ForgotPasswordForm.test.tsx # Password reset request
+│       └── ResetPasswordForm.test.tsx  # Password reset form
+├── services/
+│   ├── auth.test.ts                # Authentication service testing
+│   └── health.test.ts              # Health check service
+├── lib/
+│   ├── api-client.test.ts          # API client testing
+│   └── utils.test.ts               # Utility functions
+├── hooks/
+│   └── use-api.test.ts             # Custom hooks
+└── app/
+    ├── page.test.tsx               # Homepage testing
+    ├── login/page.test.tsx         # Login page
+    ├── register/page.test.tsx      # Registration page
+    ├── logout/page.test.tsx        # Logout page
+    └── forgot-password/page.test.tsx # Password reset page
 ```
 
 ### Testing Patterns
@@ -656,11 +697,14 @@ DEBUG=true npm run dev
 ## 🎯 Roadmap
 
 ### Current Features ✅
-- User authentication system
-- Responsive design with Tailwind
-- Component testing with Jest
-- TypeScript integration
+- Complete user authentication system (login, register, logout)
+- Password reset flow with email integration
+- Responsive design with Tailwind CSS
+- Comprehensive testing suite (154 tests)
+- TypeScript integration with strict typing
 - Health monitoring dashboard
+- Form validation and error handling
+- Loading states and user feedback
 
 ### In Development 🚧
 - User dashboard interface

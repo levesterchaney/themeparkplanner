@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -31,27 +31,27 @@ class TestSession:
         session = Session(
             user_id=1,
             token="test_token_123",
-            expires_at=datetime.utcnow() + timedelta(hours=1),
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
         )
 
         assert session.user_id == 1
         assert session.token == "test_token_123"
-        assert session.expires_at > datetime.utcnow()
+        assert session.expires_at > datetime.now(timezone.utc)
 
     def test_session_expiration_time_past(self):
         """Test session with past expiration time."""
         session = Session(
             user_id=1,
             token="test_token_123",
-            expires_at=datetime.utcnow() - timedelta(hours=1),  # Expired
+            expires_at=datetime.now(timezone.utc) - timedelta(hours=1),  # Expired
         )
 
         # Test that we can create session and check expiration manually
-        assert session.expires_at < datetime.utcnow()
+        assert session.expires_at < datetime.now(timezone.utc)
 
     def test_session_expiration_time_future(self):
         """Test session with future expiration time."""
-        future_time = datetime.utcnow() + timedelta(hours=1)
+        future_time = datetime.now(timezone.utc) + timedelta(hours=1)
         session = Session(
             user_id=1,
             token="test_token_123",
@@ -59,7 +59,7 @@ class TestSession:
         )
 
         assert session.expires_at == future_time
-        assert session.expires_at > datetime.utcnow()
+        assert session.expires_at > datetime.now(timezone.utc)
 
 
 class TestUserPreference:
@@ -137,19 +137,19 @@ class TestPasswordResetToken:
         token = PasswordResetToken(
             user_id=1,
             token_hash="reset_token_123",
-            expires_at=datetime.utcnow() + timedelta(hours=1),
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
         )
 
         assert token.user_id == 1
         assert token.token_hash == "reset_token_123"
-        assert token.expires_at > datetime.utcnow()
+        assert token.expires_at > datetime.now(timezone.utc)
 
     def test_password_reset_token_is_expired_true(self):
         """Test password reset token expiration check when expired."""
         token = PasswordResetToken(
             user_id=1,
             token_hash="reset_token_123",
-            expires_at=datetime.utcnow() - timedelta(hours=1),  # Expired
+            expires_at=datetime.now(timezone.utc) - timedelta(hours=1),  # Expired
         )
 
         assert token.is_expired is True
@@ -159,7 +159,7 @@ class TestPasswordResetToken:
         token = PasswordResetToken(
             user_id=1,
             token_hash="reset_token_123",
-            expires_at=datetime.utcnow() + timedelta(hours=1),  # Not expired
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),  # Not expired
         )
 
         assert token.is_expired is False
