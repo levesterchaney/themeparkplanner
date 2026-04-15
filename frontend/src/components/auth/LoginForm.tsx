@@ -3,6 +3,7 @@
 import { authService } from '@/services/auth';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { LoginRequestData } from '@/types/api';
 
 export default function LoginForm() {
   const [error, setError] = useState<string>('');
@@ -15,11 +16,13 @@ export default function LoginForm() {
     setError('');
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    const data: LoginRequestData = {
+      email: formData.get('email') as string,
+      password: formData.get('password') as string,
+    };
 
     try {
-      await authService.login(email, password);
+      await authService.login(data);
       //TODO Redirect to login page once implemented
       router.push('/');
     } catch (error: unknown) {

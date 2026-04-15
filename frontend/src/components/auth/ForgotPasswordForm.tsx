@@ -2,6 +2,7 @@
 
 import { authService } from '@/services/auth';
 import { useState } from 'react';
+import { ForgotPasswordRequestData } from '@/types/api';
 
 export default function ForgotPasswordForm() {
   const [error, setError] = useState<string | null>(null);
@@ -13,10 +14,12 @@ export default function ForgotPasswordForm() {
     setLoading(true);
     setError('');
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
+    const data: ForgotPasswordRequestData = {
+      email: formData.get('email') as string,
+    };
 
     try {
-      const response = await authService.sendPasswordReset(email);
+      const response = await authService.sendPasswordReset(data);
       console.log(response);
       setMessage(
         (response as { message?: string })?.message ||
