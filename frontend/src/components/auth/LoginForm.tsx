@@ -26,7 +26,6 @@ export default function LoginForm() {
       //TODO Redirect to login page once implemented
       router.push('/');
     } catch (error: unknown) {
-      console.log('Login error:', error);
       const errorMessage =
         (error as { details?: { error?: string }; message?: string })?.details
           ?.error ||

@@ -60,10 +60,10 @@ describe('LoginForm Component', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(mockAuthService.login).toHaveBeenCalledWith(
-        'test@example.com',
-        'password123'
-      );
+      expect(mockAuthService.login).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password123',
+      });
     });
 
     expect(mockPush).toHaveBeenCalledWith('/');

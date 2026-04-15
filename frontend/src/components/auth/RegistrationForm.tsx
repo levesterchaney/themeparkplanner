@@ -62,7 +62,6 @@ export default function RegistrationForm() {
       router.push('/');
     } catch (error: unknown) {
       // Surface error message to user
-      console.log('Registration error:', error);
       const errorMessage =
         (error as { details?: { error?: string }; message?: string })?.details
           ?.error ||

@@ -20,13 +20,11 @@ export default function ForgotPasswordForm() {
 
     try {
       const response = await authService.sendPasswordReset(data);
-      console.log(response);
       setMessage(
         (response as { message?: string })?.message ||
           'A reset link has been sent.'
       );
     } catch (error: unknown) {
-      console.log('Error sending password reset link:', error);
       const errorMessage =
         (error as { details?: { error?: string }; message?: string })?.details
           ?.error ||

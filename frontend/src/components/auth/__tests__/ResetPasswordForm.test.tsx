@@ -67,10 +67,10 @@ describe('ResetPasswordForm Component', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(mockAuthService.resetPassword).toHaveBeenCalledWith(
-        'test-reset-token',
-        password
-      );
+      expect(mockAuthService.resetPassword).toHaveBeenCalledWith({
+        token: 'test-reset-token',
+        newPassword: password,
+      });
     });
   });
 
@@ -289,10 +289,10 @@ describe('ResetPasswordForm Component', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(mockAuthService.resetPassword).toHaveBeenCalledWith(
-        'custom-token-123',
-        password
-      );
+      expect(mockAuthService.resetPassword).toHaveBeenCalledWith({
+        newPassword: password,
+        token: 'custom-token-123',
+      });
     });
   });
 
@@ -316,7 +316,10 @@ describe('ResetPasswordForm Component', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(mockAuthService.resetPassword).toHaveBeenCalledWith('', password);
+      expect(mockAuthService.resetPassword).toHaveBeenCalledWith({
+        newPassword: 'NewPassword123',
+        token: '',
+      });
     });
   });
 

@@ -70,9 +70,9 @@ describe('ForgotPasswordForm', () => {
     await user.type(emailInput, 'test@example.com');
     await user.click(submitButton);
 
-    expect(mockAuthService.sendPasswordReset).toHaveBeenCalledWith(
-      'test@example.com'
-    );
+    expect(mockAuthService.sendPasswordReset).toHaveBeenCalledWith({
+      email: 'test@example.com',
+    });
     expect(mockAuthService.sendPasswordReset).toHaveBeenCalledTimes(1);
   });
 
@@ -219,34 +219,8 @@ describe('ForgotPasswordForm', () => {
     await user.type(emailInput, 'user@domain.com');
     await user.click(submitButton);
 
-    expect(mockAuthService.sendPasswordReset).toHaveBeenCalledWith(
-      'user@domain.com'
-    );
-  });
-
-  it('logs error when request fails', async () => {
-    const user = userEvent.setup();
-    const consoleSpy = jest.spyOn(console, 'log');
-    const mockError = new Error('Network error');
-    mockAuthService.sendPasswordReset.mockRejectedValue(mockError);
-
-    render(<ForgotPasswordForm />);
-
-    const emailInput = screen.getByLabelText(/email address/i);
-    const submitButton = screen.getByRole('button', {
-      name: /send reset link/i,
+    expect(mockAuthService.sendPasswordReset).toHaveBeenCalledWith({
+      email: 'user@domain.com',
     });
-
-    await user.type(emailInput, 'test@example.com');
-    await user.click(submitButton);
-
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error sending password reset link:',
-        mockError
-      );
-    });
-
-    consoleSpy.mockRestore();
   });
 });

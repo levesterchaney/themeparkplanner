@@ -64,15 +64,14 @@ export default function UserProfileForm() {
       prev
         ? {
             ...prev,
-            preferences: {
-              defaultPartySize: prev.preferences?.defaultPartySize,
-              hasKids: prev.preferences?.hasKids,
-              thrillLevel: prev.preferences?.thrillLevel,
-              accessibilityNeeds: prev.preferences?.accessibilityNeeds || [],
-              dietaryRestrictions: prev.preferences?.dietaryRestrictions || [],
-              ...prev.preferences,
-              [field]: value,
-            },
+            preferences: prev.preferences
+              ? {
+                  ...prev.preferences,
+                  [field]: value,
+                }
+              : {
+                  [field]: value,
+                },
           }
         : null
     );
