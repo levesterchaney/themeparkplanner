@@ -66,7 +66,7 @@ describe('AuthService', () => {
         user_id: 1,
       });
 
-      const result = await authService.login(email, password);
+      const result = await authService.login({ email, password });
 
       expect(mockApiClient.post).toHaveBeenCalledWith('/api/v1/auth/login', {
         email,
@@ -116,7 +116,7 @@ describe('AuthService', () => {
         message: 'Password reset email sent successfully',
       });
 
-      const result = await authService.sendPasswordReset(email);
+      const result = await authService.sendPasswordReset({ email });
 
       expect(mockApiClient.post).toHaveBeenCalledWith(
         '/api/v1/auth/forgot-password',
@@ -145,7 +145,10 @@ describe('AuthService', () => {
         message: 'Password reset successfully',
       });
 
-      const result = await authService.resetPassword(token, newPassword);
+      const result = await authService.resetPassword({
+        token: token,
+        newPassword: newPassword,
+      });
 
       expect(mockApiClient.post).toHaveBeenCalledWith(
         '/api/v1/auth/reset-password',
@@ -177,7 +180,7 @@ describe('AuthService', () => {
         message: 'Password reset successfully',
       });
 
-      const result = await authService.resetPassword(token, newPassword);
+      const result = await authService.resetPassword({ token, newPassword });
 
       expect(mockApiClient.post).toHaveBeenCalledWith(
         '/api/v1/auth/reset-password',

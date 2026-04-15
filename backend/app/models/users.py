@@ -19,7 +19,7 @@ class User(Base):
     Attributes:
         id: Primary key identifier
         email: Unique email address for login and communication
-        first_name: User's first name (optional)
+        first_name: User's first name
         last_name: User's last name (optional)
         avatar_url: URL to user's profile picture (optional)
         password_hash: Bcrypt hash of user's password
@@ -31,7 +31,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, nullable=False)
-    first_name = Column(String(80))
+    first_name = Column(String(80), nullable=False)
     last_name = Column(String(80))
     avatar_url = Column(Text)
     password_hash = Column(String(255), nullable=False)

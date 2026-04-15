@@ -1,27 +1,29 @@
 import { apiClient } from '@/lib/api-client';
-import { RegistrationData } from '@/types/api';
+import {
+  ForgotPasswordRequestData,
+  LoginRequestData,
+  PasswordResetRequestData,
+  RegistrationRequestData,
+} from '@/types/api';
 
 export const authService = {
-  register: async (data: RegistrationData) => {
+  register: async (data: RegistrationRequestData) => {
     return apiClient.post('/api/v1/auth/register', data);
   },
 
-  login: async (email: string, password: string) => {
-    return apiClient.post('/api/v1/auth/login', { email, password });
+  login: async (data: LoginRequestData) => {
+    return apiClient.post('/api/v1/auth/login', data);
   },
 
   logout: async () => {
     return apiClient.post('/api/v1/auth/logout');
   },
 
-  sendPasswordReset: async (email: string) => {
-    return apiClient.post('/api/v1/auth/forgot-password', { email });
+  sendPasswordReset: async (data: ForgotPasswordRequestData) => {
+    return apiClient.post('/api/v1/auth/forgot-password', data);
   },
 
-  resetPassword: async (token: string, newPassword: string) => {
-    return apiClient.post('/api/v1/auth/reset-password', {
-      token,
-      newPassword,
-    });
+  resetPassword: async (data: PasswordResetRequestData) => {
+    return apiClient.post('/api/v1/auth/reset-password', data);
   },
 };

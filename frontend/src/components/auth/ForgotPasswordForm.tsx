@@ -2,6 +2,7 @@
 
 import { authService } from '@/services/auth';
 import { useState } from 'react';
+import { ForgotPasswordRequestData } from '@/types/api';
 
 export default function ForgotPasswordForm() {
   const [error, setError] = useState<string | null>(null);
@@ -13,17 +14,17 @@ export default function ForgotPasswordForm() {
     setLoading(true);
     setError('');
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
+    const data: ForgotPasswordRequestData = {
+      email: formData.get('email') as string,
+    };
 
     try {
-      const response = await authService.sendPasswordReset(email);
-      console.log(response);
+      const response = await authService.sendPasswordReset(data);
       setMessage(
         (response as { message?: string })?.message ||
           'A reset link has been sent.'
       );
     } catch (error: unknown) {
-      console.log('Error sending password reset link:', error);
       const errorMessage =
         (error as { details?: { error?: string }; message?: string })?.details
           ?.error ||

@@ -54,7 +54,7 @@ class TestUserRegistration:
             assert response.status_code == 409
             data = response.json()
             assert "error" in data
-            assert "email already exists" in data["error"].lower()
+            assert "email already exists" in data["details"].lower()
 
         app.dependency_overrides.clear()
 
@@ -72,7 +72,7 @@ class TestUserRegistration:
         assert response.status_code == 422
         data = response.json()
         assert "error" in data
-        assert "8 characters" in data["error"]
+        assert "8 characters" in data["details"]
 
 
 class TestUserLogin:
@@ -115,7 +115,7 @@ class TestUserLogin:
         assert response.status_code == 401
         data = response.json()
         assert "error" in data
-        assert "invalid" in data["error"].lower()
+        assert "invalid" in data["details"].lower()
 
     @pytest.mark.asyncio
     async def test_login_user_invalid_password(
@@ -140,7 +140,7 @@ class TestUserLogin:
             assert response.status_code == 401
             data = response.json()
             assert "error" in data
-            assert "invalid" in data["error"].lower()
+            assert "invalid" in data["details"].lower()
 
         app.dependency_overrides.clear()
 
@@ -558,7 +558,7 @@ class TestResetPassword:
 
         assert response.status_code == 400
         data = response.json()
-        assert "invalid" in data["error"].lower()
+        assert "invalid" in data["details"].lower()
 
     @pytest.mark.asyncio
     async def test_reset_password_expired_token(self):
@@ -610,7 +610,7 @@ class TestResetPassword:
 
             assert response.status_code == 400
             data = response.json()
-            assert "expired" in data["error"].lower()
+            assert "expired" in data["details"].lower()
 
         app.dependency_overrides.clear()
 
@@ -664,7 +664,7 @@ class TestResetPassword:
 
             assert response.status_code == 400
             data = response.json()
-            assert "already used" in data["error"].lower()
+            assert "already used" in data["details"].lower()
 
         app.dependency_overrides.clear()
 
@@ -720,7 +720,7 @@ class TestResetPassword:
 
             assert response.status_code == 400
             data = response.json()
-            assert "user not found" in data["error"].lower()
+            assert "user not found" in data["details"].lower()
 
         app.dependency_overrides.clear()
 
@@ -790,7 +790,7 @@ class TestResetPassword:
 
             assert response.status_code == 422
             data = response.json()
-            assert "failed to reset password" in data["error"].lower()
+            assert "database error" in data["details"].lower()
 
         app.dependency_overrides.clear()
 
@@ -820,7 +820,7 @@ class TestResetPassword:
 
         assert response.status_code == 400
         data = response.json()
-        assert "invalid" in data["error"].lower()
+        assert "invalid" in data["details"].lower()
 
     @pytest.mark.asyncio
     async def test_reset_password_empty_new_password(self, client: AsyncClient):
@@ -830,7 +830,7 @@ class TestResetPassword:
 
         assert response.status_code == 400
         data = response.json()
-        assert "invalid" in data["error"].lower()
+        assert "invalid" in data["details"].lower()
 
     @pytest.mark.asyncio
     async def test_reset_password_clears_all_sessions(self):

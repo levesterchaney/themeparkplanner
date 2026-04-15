@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api.health import router as health_router
+from .api.user import router as user_router
 from .api.user_auth import router as auth_router
 from .core.config import settings
 from .core.redis import redis_client
@@ -47,13 +48,14 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
 # Include routers
 app.include_router(health_router, prefix=settings.api_v1_str, tags=["health"])
 app.include_router(auth_router, prefix=settings.api_v1_str, tags=["auth"])
+app.include_router(user_router, prefix=settings.api_v1_str, tags=["users"])
 
 
 @app.get("/")

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/auth';
+import { RegistrationRequestData } from '@/types/api';
 
 export default function RegistrationForm() {
   const [error, setError] = useState<string>('');
@@ -24,7 +25,7 @@ export default function RegistrationForm() {
     setError('');
 
     const formData = new FormData(event.currentTarget);
-    const data = {
+    const data: RegistrationRequestData = {
       firstName: formData.get('first-name') as string,
       lastName: (formData.get('last-name') as string) || undefined,
       email: formData.get('email') as string,
@@ -61,7 +62,6 @@ export default function RegistrationForm() {
       router.push('/');
     } catch (error: unknown) {
       // Surface error message to user
-      console.log('Registration error:', error);
       const errorMessage =
         (error as { details?: { error?: string }; message?: string })?.details
           ?.error ||

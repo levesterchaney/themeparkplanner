@@ -232,7 +232,7 @@ export const authService = {
 ### Type Definitions
 ```typescript
 // src/types/api.ts
-export interface RegistrationData {
+export interface RegistrationRequestData {
   email: string;
   password: string;
   firstName?: string;

@@ -3,6 +3,7 @@
 import { authService } from '@/services/auth';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { PasswordResetRequestData } from '@/types/api';
 
 export default function ResetPasswordForm() {
   const [error, setError] = useState<string | null>(null);
@@ -23,17 +24,18 @@ export default function ResetPasswordForm() {
     setError('');
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const newPassword = formData.get('new-password') as string;
+    const data: PasswordResetRequestData = {
+      newPassword: formData.get('new-password') as string,
+      token: new URLSearchParams(window.location.search).get('token') || '',
+    };
     const confirmedPassword = formData.get('confirm-password') as string;
-    const token =
-      new URLSearchParams(window.location.search).get('token') || '';
 
-    if (newPassword !== confirmedPassword) {
+    if (data.newPassword !== confirmedPassword) {
       setError('Passwords must match.');
       setLoading(false);
       return;
     }
-    if (!isValidPassword(newPassword)) {
+    if (!isValidPassword(data.newPassword)) {
       setError(
         'Password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers.'
       );
@@ -41,7 +43,7 @@ export default function ResetPasswordForm() {
       return;
     }
     try {
-      await authService.resetPassword(token, newPassword);
+      await authService.resetPassword(data);
     } catch (error) {
       const errorMessage =
         (error as { details?: { error?: string }; message?: string })?.details
