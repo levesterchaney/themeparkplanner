@@ -129,6 +129,7 @@ export default function UserProfileForm() {
       const updatedResponse =
         (await userService.getProfile()) as UserProfileResponseData;
       setFormData(updatedResponse);
+      alert('User profile updated successfully!');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update profile');
     } finally {
