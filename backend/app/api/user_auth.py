@@ -12,7 +12,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.models import PasswordResetToken, Session, User, UserPreference
-from app.services.email import send_email
+from app.services.email_service import send_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

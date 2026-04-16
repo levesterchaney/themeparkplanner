@@ -21,7 +21,7 @@ class Park(Base):
     id = Column(Integer, primary_key=True, index=True)
     external_id = Column(String(255), unique=True, nullable=False)
     name = Column(String(255), nullable=False)
-    slug = Column(String(80), unique=True, nullable=False)
+    slug = Column(String(80), nullable=False)
     resort_name = Column(String(255))
     timezone = Column(String(255), nullable=False)
     location_lat = Column(Numeric(9, 6))
