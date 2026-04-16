@@ -23,6 +23,7 @@ class User(Base):
         last_name: User's last name (optional)
         avatar_url: URL to user's profile picture (optional)
         password_hash: Bcrypt hash of user's password
+        role: User role (user, admin, moderator) - defaults to "user"
         created_at: Account creation timestamp
         updated_at: Last modification timestamp
     """
@@ -35,6 +36,7 @@ class User(Base):
     last_name = Column(String(80))
     avatar_url = Column(Text)
     password_hash = Column(String(255), nullable=False)
+    role = Column(String(50), default="user", nullable=False)
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -44,6 +46,28 @@ class User(Base):
         onupdate=func.now(),
         nullable=False,
     )
+
+    @validates("role")
+    def validate_role(self, key, value):
+        """
+        Validate user role.
+
+        Args:
+            key: The column name being validated
+            value: The role value to validate
+
+        Returns:
+            str: The validated role value
+
+        Raises:
+            ValueError: If role is not in allowed values
+        """
+        if value is None:
+            return value
+        allowed_roles = ["user", "admin", "moderator"]
+        if value not in allowed_roles:
+            raise ValueError(f"Role must be one of {allowed_roles}")
+        return value
 
 
 class UserPreference(Base):

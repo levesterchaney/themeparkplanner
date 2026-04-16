@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from datetime import datetime, timezone
 
@@ -7,6 +6,7 @@ from sqlalchemy import select
 
 from app.core.database import AsyncSessionLocal
 from app.models import Attraction, Park
+from app.services.cache_service import cache_service
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,20 @@ class ThemeParkClient:
             "Referer": "https://themeparkplanner.app",
             "User-Agent": "ThemeParkPlanner/1.0",
         }
+
+    async def invalidate_park_cache(self, park_id: int = None):
+        """Invalidate park-related cache entries after data sync"""
+        logger.info(f"Invalidating cache for park_id: {park_id}")
+
+        if park_id:
+            # Invalidate specific park caches
+            await cache_service.delete(cache_service.generate_park_key(park_id))
+            await cache_service.delete(
+                cache_service.generate_park_attractions_key(park_id)
+            )
+
+        # Always invalidate parks list when any park data changes
+        await cache_service.delete(cache_service.generate_parks_list_key())
 
     async def get_parks_by_destination(self, client: AsyncClient):
         """Fetch the list of parks by destination from the API"""
@@ -51,7 +65,7 @@ class ThemeParkClient:
         park_data = response.json()
 
         try:
-            logger.debug(
+            print(
                 f"Checking if park with external_id {park_data['id']} already exists "
                 f"in database"
             )
@@ -67,9 +81,7 @@ class ThemeParkClient:
             park = None
 
         if not park:
-            logger.debug(
-                f"Creating new park with external_id {park_data['id']} in database"
-            )
+            print(f"Creating new park with external_id {park_data['id']} in database")
             park = Park(
                 external_id=park_data["id"],
                 name=park_data["name"],
@@ -94,7 +106,7 @@ class ThemeParkClient:
                 synced_at=datetime.now(timezone.utc),
             )
         else:
-            logger.debug(
+            print(
                 f"Updating existing park with external_id {park_data['id']} "
                 f"in database"
             )
@@ -116,12 +128,14 @@ class ThemeParkClient:
             park.synced_at = datetime.now(timezone.utc)
 
         try:
-            logger.debug(
-                f"Committing park with external_id {park_data['id']} to database"
-            )
+            print(f"Committing park with external_id {park_data['id']} to database")
             db.add(park)
             await db.commit()
             await db.refresh(park)
+
+            # Invalidate park-related cache after successful commit
+            await self.invalidate_park_cache(park.id)
+
             logger.info(
                 f"Successfully committed park with external_id {park_data['id']} "
                 f"to database with id {park.id}"
@@ -154,7 +168,7 @@ class ThemeParkClient:
                 f"for park_id {external_park_id}"
             )
             try:
-                logger.debug(
+                print(
                     f"Checking if attraction with external_id "
                     f"{attraction_data['id']} already exists in database"
                 )
@@ -172,7 +186,7 @@ class ThemeParkClient:
                 attraction = None
 
             if not attraction:
-                logger.debug(
+                print(
                     f"Creating new attraction with external_id "
                     f"{attraction_data['id']} in database"
                 )
@@ -192,7 +206,7 @@ class ThemeParkClient:
                     synced_at=datetime.now(timezone.utc),
                 )
             else:
-                logger.debug(
+                print(
                     f"Updating existing attraction with external_id "
                     f"{attraction_data['id']} in database"
                 )
@@ -210,12 +224,16 @@ class ThemeParkClient:
                 attraction.synced_at = datetime.now(timezone.utc)
 
             try:
-                logger.debug(
+                print(
                     f"Committing attraction with external_id {attraction_data['id']} "
                     f"to database"
                 )
                 db.add(attraction)
                 await db.commit()
+
+                # Invalidate attraction cache after successful commit
+                await self.invalidate_park_cache(internal_park_id)
+
                 logger.info(
                     f"Successfully committed attraction with external_id "
                     f"{attraction_data['id']} to database with id {attraction.id}"
@@ -229,7 +247,37 @@ class ThemeParkClient:
                 raise e
         logger.info(f"Finished processing attractions for park_id {external_park_id}")
 
-    async def sync_theme_park_data(self):
+    async def sync_individual_theme_park_data(self, park_id):
+        """
+        Sync data for a specific theme park by its internal database ID.
+        """
+        logger.info(f"Starting sync process for park_id {park_id}")
+        try:
+            async with AsyncClient(
+                base_url=self.base_url, headers=self.headers
+            ) as client:
+                async with AsyncSessionLocal() as session:
+                    park = await session.execute(select(Park).where(Park.id == park_id))
+                    park = park.scalar_one_or_none()
+                    if not park:
+                        logger.error(f"Park with id {park_id} not found in database")
+                        return
+
+                    external_park_id = park.external_id
+                    destination_name = park.resort_name
+
+                    await self.sync_park_data(
+                        client, session, external_park_id, destination_name
+                    )
+                    await self.sync_attraction_data(
+                        client, session, external_park_id, park_id
+                    )
+            logger.info(f"Finished sync process for park_id {park_id}")
+        except Exception as e:
+            logger.error(f"Error syncing data for park_id {park_id}: {str(e)}")
+            raise e
+
+    async def sync_all_theme_park_data(self):
         """
         Sync park data from the Theme Parks Wiki API to the local database.
         """
@@ -260,5 +308,9 @@ class ThemeParkClient:
         logger.info("Finished theme park data sync process")
 
 
-if __name__ == "__main__":
-    asyncio.run(ThemeParkClient().sync_theme_park_data())
+async def sync_park_data(park_id=None):
+    client = ThemeParkClient()
+    if park_id:
+        await client.sync_individual_theme_park_data(park_id)
+    else:
+        await client.sync_all_theme_park_data()
