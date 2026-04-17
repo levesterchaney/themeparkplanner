@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
+import ResetPasswordForm from '@/forms/auth/ResetPasswordForm';
 
 // Mock the auth service
 jest.mock('@/services/auth', () => ({
@@ -26,7 +26,7 @@ Object.defineProperty(window, 'location', {
   writable: true,
 });
 
-import { authService } from '@/services/auth';
+import { authService } from '@/services';
 
 const mockAuthService = authService as jest.Mocked<typeof authService>;
 

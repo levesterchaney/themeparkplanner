@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService } from '@/services/auth';
+import { authService } from '@/services';
 import { RegistrationRequestData } from '@/types/api';
 
 export default function RegistrationForm() {

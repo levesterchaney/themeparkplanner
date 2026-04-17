@@ -1,6 +1,6 @@
 'use client';
 
-import { authService } from '@/services/auth';
+import { authService } from '@/services';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { PasswordResetRequestData } from '@/types/api';

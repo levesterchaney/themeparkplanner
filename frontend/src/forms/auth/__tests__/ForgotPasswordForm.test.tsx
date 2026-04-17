@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ForgotPasswordForm from '../ForgotPasswordForm';
-import { authService } from '@/services/auth';
+import { authService } from '@/services';
 
 jest.mock('@/services/auth', () => ({
   authService: {

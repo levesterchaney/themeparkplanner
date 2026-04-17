@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import HeaderNav from '@/components/HeaderNav';
+import { cookies } from 'next/headers';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -22,17 +24,24 @@ export const metadata: Metadata = {
     'every day of your visit — built around your party, your pace, and your must-dos.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const hasSessionCookie = cookieStore.has('session_token');
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <div className="fixed inset-0 bg-gradient-to-br from-blue-100 to-purple-200 opacity-50 -z-10" />
+        <HeaderNav hasActiveSession={hasSessionCookie} />
+        <main className="flex-1">{children}</main>
+      </body>
     </html>
   );
 }

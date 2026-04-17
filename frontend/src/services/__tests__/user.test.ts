@@ -1,4 +1,4 @@
-import { userService } from '@/services/user';
+import { userService } from '@/services';
 import { apiClient } from '@/lib';
 import { UserProfileRequestData, UserPreferenceRequestData } from '@/types/api';
 

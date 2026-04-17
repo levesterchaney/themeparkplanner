@@ -1,4 +1,4 @@
-import { healthService } from '@/services/health';
+import { healthService } from '@/services';
 import { apiClient } from '@/lib/api-client';
 
 // Mock the API client

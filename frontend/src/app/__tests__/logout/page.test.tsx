@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import LogoutPage from '@/app/logout/page';
-import { authService } from '@/services/auth';
+import { authService } from '@/services';
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import UserProfileForm from '@/components/user/UserProfileForm';
+import UserProfileForm from '@/forms/user/UserProfileForm';
 
 // Mock the user service
 jest.mock('@/services/user', () => ({
@@ -16,7 +16,7 @@ jest.mock('@/services/user', () => ({
   },
 }));
 
-import { userService } from '@/services/user';
+import { userService } from '@/services';
 const mockUserService = userService as jest.Mocked<typeof userService>;
 
 describe('UserProfileForm - Preference Value Mappings', () => {

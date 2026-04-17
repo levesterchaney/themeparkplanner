@@ -1,7 +1,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserProfileForm from '@/components/user/UserProfileForm';
+import UserProfileForm from '@/forms/user/UserProfileForm';
 
 // Mock the user service
 jest.mock('@/services/user', () => ({
@@ -13,7 +13,7 @@ jest.mock('@/services/user', () => ({
   UserProfileResponseData: {}, // Mock the interface export
 }));
 
-import { userService } from '@/services/user';
+import { userService } from '@/services';
 
 const mockUserService = userService as jest.Mocked<typeof userService>;
 

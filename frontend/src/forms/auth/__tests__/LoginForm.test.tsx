@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import LoginForm from '@/components/auth/LoginForm';
+import LoginForm from '@/forms/auth/LoginForm';
 
 // Mock the auth service
 jest.mock('@/services/auth', () => ({
@@ -18,7 +18,7 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
-import { authService } from '@/services/auth';
+import { authService } from '@/services';
 
 const mockAuthService = authService as jest.Mocked<typeof authService>;
 
