@@ -13,10 +13,10 @@ const customJestConfig = {
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
-      '!src/**/index.ts',
+    '!src/**/index.ts',
     '!src/app/**/layout.tsx',
     '!src/app/**/page.tsx',
-    '!src/proxy.ts',
+    '!src/middleware.ts',
     '!src/app/api/health/route.ts',
   ],
   coverageThreshold: {

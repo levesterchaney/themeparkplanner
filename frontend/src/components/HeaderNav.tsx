@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useSession } from '@/contexts/SessionContext';
 import { authService } from '@/services';
+import { Button } from '@/components';
 
 export default function HeaderNav() {
   // const location = usePathname();
@@ -37,7 +38,7 @@ export default function HeaderNav() {
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => navigate('/')}
           >
-            <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-2 rounded-lg"></div>
+            <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-2 rounded-lg" />
             <h1 className="text-xl font-semibold dark:text-white">
               Theme Park Planner
             </h1>
@@ -46,9 +47,9 @@ export default function HeaderNav() {
           {isAuthenticated && (
             <div className="flex items-center gap-4">
               <nav className="hidden md:flex gap-2">
-                <button onClick={() => navigate('/trips')}>My Trips</button>
-                <button onClick={() => navigate('/profile')}>Account</button>
-                <button onClick={handleLogout}>Logout</button>
+                <Button onClick={() => navigate('/trips')}>My Trips</Button>
+                <Button onClick={() => navigate('/profile')}>Account</Button>
+                <Button onClick={handleLogout}>Logout</Button>
               </nav>
             </div>
           )}
@@ -56,7 +57,7 @@ export default function HeaderNav() {
           {!isAuthenticated && (
             <div className="flex items-center gap-4">
               <nav className="hidden md:flex gap-2">
-                <button onClick={() => navigate('/login')}>Login</button>
+                <Button onClick={() => navigate('/login')}>Login</Button>
               </nav>
             </div>
           )}
