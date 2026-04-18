@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import RegisterPage from '@/app/register/page';
 
 // Mock the RegistrationForm component
-jest.mock('@/components/auth/RegistrationForm', () => {
+jest.mock('@/forms/auth/RegistrationForm', () => {
   return function MockRegistrationForm() {
     return (
       <div data-testid="registration-form">Registration Form Component</div>

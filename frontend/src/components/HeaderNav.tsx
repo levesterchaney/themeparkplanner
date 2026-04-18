@@ -1,17 +1,28 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useSession } from '@/contexts/SessionContext';
+import { authService } from '@/services';
 
-interface HeaderNavProps {
-  hasActiveSession: boolean;
-}
-
-export default function HeaderNav(props: HeaderNavProps) {
+export default function HeaderNav() {
   // const location = usePathname();
   const router = useRouter();
+  const { isAuthenticated, setIsAuthenticated } = useSession();
 
   const navigate = (path: string) => {
     router.push(path);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      setIsAuthenticated(false);
+      router.push('/');
+    } catch {
+      // Even if logout fails, clear the session
+      setIsAuthenticated(false);
+      router.push('/');
+    }
   };
 
   // const isActive = (path: string) => {
@@ -32,17 +43,17 @@ export default function HeaderNav(props: HeaderNavProps) {
             </h1>
           </div>
 
-          {props.hasActiveSession && (
+          {isAuthenticated && (
             <div className="flex items-center gap-4">
               <nav className="hidden md:flex gap-2">
                 <button onClick={() => navigate('/trips')}>My Trips</button>
                 <button onClick={() => navigate('/profile')}>Account</button>
-                <button onClick={() => navigate('/logout')}>Logout</button>
+                <button onClick={handleLogout}>Logout</button>
               </nav>
             </div>
           )}
 
-          {!props.hasActiveSession && (
+          {!isAuthenticated && (
             <div className="flex items-center gap-4">
               <nav className="hidden md:flex gap-2">
                 <button onClick={() => navigate('/login')}>Login</button>

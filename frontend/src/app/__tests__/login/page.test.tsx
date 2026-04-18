@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import LoginPage from '@/app/login/page';
 
 // Mock the LoginForm component
-jest.mock('@/components/auth/LoginForm', () => {
+jest.mock('@/forms/auth/LoginForm', () => {
   return function MockLoginForm() {
     return <div data-testid="login-form">Login Form Component</div>;
   };
@@ -12,9 +12,7 @@ describe('LoginPage', () => {
   it('renders the page title', () => {
     render(<LoginPage />);
 
-    expect(
-      screen.getByText('Welcome Back to Theme Park Planner')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Welcome!')).toBeInTheDocument();
   });
 
   it('renders the LoginForm component', () => {
@@ -43,6 +41,6 @@ describe('LoginPage', () => {
 
     const heading = screen.getByRole('heading', { level: 2 });
     expect(heading).toHaveClass('text-3xl', 'font-bold', 'text-center');
-    expect(heading).toHaveTextContent('Welcome Back to Theme Park Planner');
+    expect(heading).toHaveTextContent('Welcome!');
   });
 });

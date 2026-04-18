@@ -3,19 +3,23 @@
 import { useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services';
+import { useSession } from '@/contexts/SessionContext';
 
 export default function LogoutPage() {
   const router = useRouter();
+  const { setIsAuthenticated } = useSession();
 
   const performLogout = useCallback(async () => {
     try {
       await authService.logout();
+      setIsAuthenticated(false); // Update session context
       router.push('/login');
     } catch {
       //TODO how to handle logout failure? Redirect to home page with error message?
+      setIsAuthenticated(false); // Update session context even on failure
       router.push('/'); // Redirect to home page on logout failure for now
     }
-  }, [router]);
+  }, [router, setIsAuthenticated]);
 
   useEffect(() => {
     performLogout();

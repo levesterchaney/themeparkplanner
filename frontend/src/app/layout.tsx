@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import HeaderNav from '@/components/HeaderNav';
+import { Header } from '@/components';
+import { SessionProvider } from '@/contexts/SessionContext';
 import { cookies } from 'next/headers';
 
 const geistSans = Geist({
@@ -39,8 +40,10 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <div className="fixed inset-0 bg-gradient-to-br from-blue-100 to-purple-200 opacity-50 -z-10" />
-        <HeaderNav hasActiveSession={hasSessionCookie} />
-        <main className="flex-1">{children}</main>
+        <SessionProvider initialAuth={hasSessionCookie}>
+          <Header />
+          <main className="flex-1">{children}</main>
+        </SessionProvider>
       </body>
     </html>
   );

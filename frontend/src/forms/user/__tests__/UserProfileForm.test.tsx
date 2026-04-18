@@ -81,10 +81,10 @@ describe('UserProfileForm - Preferences Tests', () => {
       // Check preferences
       expect(screen.getByDisplayValue('2')).toBeInTheDocument(); // party size
       expect(
-        screen.getByRole('combobox', { name: /thrill ride preference/i })
+        screen.getByRole('combobox', { name: /preferred thrill level/i })
       ).toHaveValue('moderate');
       expect(
-        screen.getByRole('checkbox', { name: /traveling with kids/i })
+        screen.getByRole('checkbox', { name: /traveling with children/i })
       ).not.toBeChecked();
     });
   });
@@ -101,7 +101,7 @@ describe('UserProfileForm - Preferences Tests', () => {
       });
 
       const partySizeInput = screen.getByLabelText(
-        /preferred party size/i
+        /party size/i
       ) as HTMLInputElement;
       await user.clear(partySizeInput);
       fireEvent.change(partySizeInput, { target: { value: '4' } });
@@ -119,12 +119,12 @@ describe('UserProfileForm - Preferences Tests', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByRole('checkbox', { name: /traveling with kids/i })
+          screen.getByRole('checkbox', { name: /traveling with children/i })
         ).not.toBeChecked();
       });
 
       const kidsCheckbox = screen.getByRole('checkbox', {
-        name: /traveling with kids/i,
+        name: /traveling with children/i,
       });
       await user.click(kidsCheckbox);
 
@@ -139,19 +139,19 @@ describe('UserProfileForm - Preferences Tests', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByRole('combobox', { name: /thrill ride preference/i })
+          screen.getByRole('combobox', { name: /preferred thrill level/i })
         ).toHaveValue('moderate');
       });
 
       const thrillSelect = screen.getByRole('combobox', {
-        name: /thrill ride preference/i,
+        name: /preferred thrill level/i,
       });
       await user.selectOptions(thrillSelect, 'high');
 
       expect(thrillSelect).toHaveValue('high');
     });
 
-    test('handles accessibility needs multi-select change', async () => {
+    test('handles accessibility needs checkbox changes', async () => {
       const user = userEvent.setup();
       mockUserService.getProfile.mockResolvedValue(mockUserData);
 
@@ -161,19 +161,23 @@ describe('UserProfileForm - Preferences Tests', () => {
         expect(screen.getByDisplayValue('John')).toBeInTheDocument();
       });
 
-      const accessibilitySelect = screen.getByLabelText(/accessibility needs/i);
+      // The wheelchair checkbox should be checked (from mock data)
+      const wheelchairCheckbox = screen.getByRole('checkbox', {
+        name: /wheelchair/i,
+      });
+      expect(wheelchairCheckbox).toBeChecked();
 
-      // Select multiple options
-      await user.selectOptions(accessibilitySelect, ['wheelchair', 'hearing']);
+      // Click another accessibility checkbox
+      const hearingCheckbox = screen.getByRole('checkbox', {
+        name: /hearing impairment/i,
+      });
+      expect(hearingCheckbox).not.toBeChecked();
 
-      const selectedOptions = Array.from(
-        accessibilitySelect.selectedOptions
-      ).map((option) => option.value);
-      expect(selectedOptions).toContain('wheelchair');
-      expect(selectedOptions).toContain('hearing');
+      await user.click(hearingCheckbox);
+      expect(hearingCheckbox).toBeChecked();
     });
 
-    test('handles dietary restrictions multi-select change', async () => {
+    test('handles dietary restrictions checkbox changes', async () => {
       const user = userEvent.setup();
       mockUserService.getProfile.mockResolvedValue(mockUserData);
 
@@ -183,16 +187,18 @@ describe('UserProfileForm - Preferences Tests', () => {
         expect(screen.getByDisplayValue('John')).toBeInTheDocument();
       });
 
-      const dietarySelect = screen.getByLabelText(/dietary needs/i);
+      // The vegetarian checkbox should be checked (from mock data)
+      const vegetarianCheckbox = screen.getByRole('checkbox', {
+        name: /vegetarian/i,
+      });
+      expect(vegetarianCheckbox).toBeChecked();
 
-      // Select multiple options
-      await user.selectOptions(dietarySelect, ['vegetarian', 'glutenFree']);
+      // Click another dietary checkbox
+      const veganCheckbox = screen.getByRole('checkbox', { name: /vegan/i });
+      expect(veganCheckbox).not.toBeChecked();
 
-      const selectedOptions = Array.from(dietarySelect.selectedOptions).map(
-        (option) => option.value
-      );
-      expect(selectedOptions).toContain('vegetarian');
-      expect(selectedOptions).toContain('glutenFree');
+      await user.click(veganCheckbox);
+      expect(veganCheckbox).toBeChecked();
     });
   });
 
@@ -213,20 +219,16 @@ describe('UserProfileForm - Preferences Tests', () => {
         expect(screen.getByDisplayValue('John')).toBeInTheDocument();
       });
 
-      // Modify some fields
+      // Modify profile fields
       const firstNameInput = screen.getByLabelText(/first name/i);
       await user.clear(firstNameInput);
       await user.type(firstNameInput, 'Johnny');
 
-      const partySizeInput = screen.getByLabelText(/preferred party size/i);
-      await user.clear(partySizeInput);
-      fireEvent.change(partySizeInput, { target: { value: '4' } });
-
-      // Submit form
-      const submitButton = screen.getByRole('button', {
-        name: /save changes/i,
+      // Submit profile form first
+      const profileSubmitButton = screen.getByRole('button', {
+        name: /save profile/i,
       });
-      await user.click(submitButton);
+      await user.click(profileSubmitButton);
 
       await waitFor(() => {
         expect(mockUserService.updateProfile).toHaveBeenCalledWith({
@@ -234,7 +236,20 @@ describe('UserProfileForm - Preferences Tests', () => {
           lastName: 'Doe',
           avatarUrl: 'https://example.com/avatar.jpg',
         });
+      });
 
+      // Now modify preferences
+      const partySizeInput = screen.getByLabelText(/party size/i);
+      await user.clear(partySizeInput);
+      fireEvent.change(partySizeInput, { target: { value: '4' } });
+
+      // Submit preferences form
+      const preferencesSubmitButton = screen.getByRole('button', {
+        name: /save preferences/i,
+      });
+      await user.click(preferencesSubmitButton);
+
+      await waitFor(() => {
         expect(mockUserService.updateUserPreferences).toHaveBeenCalledWith({
           defaultPartySize: 4,
           hasKids: false,
@@ -259,7 +274,7 @@ describe('UserProfileForm - Preferences Tests', () => {
       });
 
       const submitButton = screen.getByRole('button', {
-        name: /save changes/i,
+        name: /save profile/i,
       });
       await user.click(submitButton);
 
@@ -282,7 +297,7 @@ describe('UserProfileForm - Preferences Tests', () => {
       });
 
       const submitButton = screen.getByRole('button', {
-        name: /save changes/i,
+        name: /save profile/i,
       });
       await user.click(submitButton);
 
@@ -304,13 +319,13 @@ describe('UserProfileForm - Preferences Tests', () => {
       });
 
       // Check that preference fields handle undefined values gracefully
-      expect(screen.getByLabelText(/preferred party size/i)).toHaveValue(null);
+      expect(screen.getByLabelText(/party size/i)).toHaveValue(1); // Default value
       expect(
-        screen.getByRole('checkbox', { name: /traveling with kids/i })
+        screen.getByRole('checkbox', { name: /traveling with children/i })
       ).not.toBeChecked();
       expect(
-        screen.getByRole('combobox', { name: /thrill ride preference/i })
-      ).toHaveValue('moderate');
+        screen.getByRole('combobox', { name: /preferred thrill level/i })
+      ).toHaveValue('low'); // Default first option when no preference
     });
 
     test('only sends defined preferences in update request', async () => {
@@ -338,9 +353,9 @@ describe('UserProfileForm - Preferences Tests', () => {
         expect(screen.getByDisplayValue('John')).toBeInTheDocument();
       });
 
-      // Submit form
+      // Submit preferences form
       const submitButton = screen.getByRole('button', {
-        name: /save changes/i,
+        name: /save preferences/i,
       });
       await user.click(submitButton);
 
@@ -380,7 +395,7 @@ describe('UserProfileForm - Preferences Tests', () => {
       });
 
       const submitButton = screen.getByRole('button', {
-        name: /save changes/i,
+        name: /save preferences/i,
       });
       await user.click(submitButton);
 
@@ -418,7 +433,7 @@ describe('UserProfileForm - Preferences Tests', () => {
       });
 
       const submitButton = screen.getByRole('button', {
-        name: /save changes/i,
+        name: /save preferences/i,
       });
       await user.click(submitButton);
 
@@ -447,7 +462,7 @@ describe('UserProfileForm - Preferences Tests', () => {
       await user.clear(firstNameInput);
 
       const submitButton = screen.getByRole('button', {
-        name: /save changes/i,
+        name: /save profile/i,
       });
       await user.click(submitButton);
 
@@ -465,11 +480,11 @@ describe('UserProfileForm - Preferences Tests', () => {
         expect(screen.getByDisplayValue('2')).toBeInTheDocument();
       });
 
-      const partySizeInput = screen.getByLabelText(/preferred party size/i);
+      const partySizeInput = screen.getByLabelText(/party size/i);
       await user.clear(partySizeInput);
 
       const submitButton = screen.getByRole('button', {
-        name: /save changes/i,
+        name: /save preferences/i,
       });
       await user.click(submitButton);
 
@@ -492,15 +507,17 @@ describe('UserProfileForm - Preferences Tests', () => {
       expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/party size/i)).toBeInTheDocument();
       expect(
-        screen.getByLabelText(/preferred party size/i)
+        screen.getByLabelText(/traveling with children/i)
       ).toBeInTheDocument();
-      expect(screen.getByLabelText(/traveling with kids/i)).toBeInTheDocument();
       expect(
-        screen.getByLabelText(/thrill ride preference/i)
+        screen.getByLabelText(/preferred thrill level/i)
       ).toBeInTheDocument();
-      expect(screen.getByLabelText(/accessibility needs/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/dietary needs/i)).toBeInTheDocument();
+
+      // Check accessibility and dietary checkboxes exist
+      expect(screen.getByLabelText(/wheelchair/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/vegetarian/i)).toBeInTheDocument();
     });
 
     test('submit button has proper disabled state during loading', async () => {
@@ -517,7 +534,7 @@ describe('UserProfileForm - Preferences Tests', () => {
       });
 
       const submitButton = screen.getByRole('button', {
-        name: /save changes/i,
+        name: /save profile/i,
       });
       await user.click(submitButton);
 

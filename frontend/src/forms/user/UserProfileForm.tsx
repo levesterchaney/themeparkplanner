@@ -3,7 +3,14 @@
 import { useEffect, useState } from 'react';
 import { userService } from '@/services';
 import { UserPreferenceRequestData } from '@/types/api';
-import { Card, Input } from '@/components';
+import {
+  Button,
+  Card,
+  Checkbox,
+  Dropdown,
+  Textbox,
+  Numberbox,
+} from '@/components';
 
 interface UserProfileResponseData {
   firstName: string;
@@ -18,6 +25,13 @@ interface UserProfileResponseData {
     dietaryRestrictions?: string[];
   };
 }
+
+const thrillLevelOptions = [
+  { label: 'Low - Gentle rides and shows', value: 'low' },
+  { label: 'Medium - Mix of everything', value: 'moderate' },
+  { label: 'High - Thrill rides and coasters', value: 'high' },
+  { label: 'Extreme - Only the most intense rides', value: 'extreme' },
+];
 
 const accessibilityOptions = [
   { label: 'Wheelchair', value: 'wheelchair' },
@@ -94,6 +108,43 @@ export default function UserProfileForm() {
           }
         : null
     );
+  };
+
+  const handleBooleanPreferenceChange = (
+    field: string,
+    value: string | boolean,
+    isChecked: boolean
+  ) => {
+    handlePreferenceChange(field, isChecked);
+  };
+
+  const handleArrayPreferenceChange = (
+    field: string,
+    value: string | boolean,
+    isChecked: boolean
+  ) => {
+    setUserData((prev) => {
+      if (!prev) return null;
+      const currentArray =
+        (prev.preferences?.[
+          field as keyof typeof prev.preferences
+        ] as string[]) || [];
+      const newArray = isChecked
+        ? [...currentArray, value as string]
+        : currentArray.filter((item) => item !== value);
+
+      return {
+        ...prev,
+        preferences: prev.preferences
+          ? {
+              ...prev.preferences,
+              [field]: newArray,
+            }
+          : {
+              [field]: newArray,
+            },
+      };
+    });
   };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
@@ -198,28 +249,25 @@ export default function UserProfileForm() {
             description={'Your personal details'}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
+              <Textbox
                 label="First Name"
                 id="firstName"
-                type="text"
                 value={user?.firstName || ''}
                 handleChange={handleInputChange}
                 isRequired={true}
               />
-              <Input
+              <Textbox
                 label="Last Name"
                 id="lastName"
-                type="text"
                 value={user?.lastName || ''}
                 handleChange={handleInputChange}
                 isRequired={true}
               />
             </div>
             <div>
-              <Input
+              <Textbox
                 label="Email"
                 id="email"
-                type="email"
                 value={user?.email || ''}
                 handleChange={handleInputChange}
                 isDisabled={true}
@@ -229,14 +277,14 @@ export default function UserProfileForm() {
 
             {/* Save Button */}
             <div className="pt-4">
-              <div className="pt-4 border-t">
-                <button
+              <div className="pt-4 border-t flex justify-end">
+                <Button
                   type="submit"
-                  className="w-full md:w-auto flex-auto content-end"
+                  variant="primary"
                   onClick={handleProfileSubmit}
                 >
                   Save Profile
-                </button>
+                </Button>
               </div>
             </div>
           </Card>
@@ -250,21 +298,12 @@ export default function UserProfileForm() {
           >
             {/* Party Size */}
             <div className="space-y-2">
-              <label htmlFor="partySize">Party Size</label>
-              <input
-                id="partySize"
-                name="partySize"
-                type="number"
-                min="1"
-                max="20"
-                value={user?.preferences?.defaultPartySize}
-                onChange={(e) =>
-                  handlePreferenceChange(
-                    'defaultPartySize',
-                    parseInt(e.target.value) || 1
-                  )
-                }
-                required
+              <Numberbox
+                label="Party Size"
+                id="defaultPartySize"
+                value={user?.preferences?.defaultPartySize || 1}
+                handleChange={handlePreferenceChange}
+                isRequired={true}
               />
               <p className="text-sm text-gray-500">
                 Number of people in your party
@@ -274,78 +313,49 @@ export default function UserProfileForm() {
             {/* Kids */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
-                <input
+                <Checkbox
                   id="hasKids"
-                  name="hasKids"
-                  type="checkbox"
-                  checked={user?.preferences?.hasKids}
-                  onChange={(e) =>
-                    handlePreferenceChange('hasKids', e.target.checked)
-                  }
+                  label="Traveling with children"
+                  value={user?.preferences?.hasKids || false}
+                  isChecked={user?.preferences?.hasKids || false}
+                  handleChange={handleBooleanPreferenceChange}
                 />
-                <label htmlFor="hasKids" className="cursor-pointer">
-                  Traveling with children
-                </label>
               </div>
               {/* Would be great to capture kids ages here in a future release */}
             </div>
 
             {/* Thrill Level */}
             <div className="space-y-2">
-              <label htmlFor="thrillLevel">Preferred Thrill Level</label>
-              <select
+              <Dropdown
                 id="thrillLevel"
-                name="thrillLevel"
-                value={user?.preferences?.thrillLevel}
-                onChange={(e) =>
-                  handlePreferenceChange('thrillLevel', e.target.value)
-                }
-              >
-                <option value="low">Low - Gentle rides and shows</option>
-                <option value="moderate">Medium - Mix of everything</option>
-                <option value="high">High - Thrill rides and coasters</option>
-                <option value="extreme">
-                  Extreme - Only the most intense rides
-                </option>
-              </select>
+                label="Preferred Thrill Level"
+                current={user?.preferences?.thrillLevel || ''}
+                options={thrillLevelOptions}
+                handleChange={handlePreferenceChange}
+              />
             </div>
 
             {/* Accessibility */}
             <div className="space-y-3">
-              <label>Accessibility Needs</label>
+              <p>Accessibility Needs</p>
               <div className="space-y-2">
                 {accessibilityOptions.map((option) => (
                   <div
                     key={option.value}
                     className="flex items-center space-x-2"
                   >
-                    <input
+                    <Checkbox
                       id={`access-${option.value}`}
-                      type="checkbox"
-                      checked={user?.preferences?.accessibilityNeeds?.includes(
-                        option.value
-                      )}
-                      onChange={(e) =>
-                        handlePreferenceChange(
-                          'accessibilityNeeds',
-                          e.target.checked
-                            ? [
-                                ...(user?.preferences?.accessibilityNeeds ||
-                                  []),
-                                option.value,
-                              ]
-                            : user?.preferences?.accessibilityNeeds?.filter(
-                                (need) => need !== option.value
-                              ) || []
-                        )
+                      label={option.label}
+                      field="accessibilityNeeds"
+                      value={option.value}
+                      isChecked={
+                        user?.preferences?.accessibilityNeeds?.includes(
+                          option.value
+                        ) || false
                       }
+                      handleChange={handleArrayPreferenceChange}
                     />
-                    <label
-                      htmlFor={`access-${option.value}`}
-                      className="cursor-pointer font-normal"
-                    >
-                      {option.label}
-                    </label>
                   </div>
                 ))}
               </div>
@@ -353,54 +363,41 @@ export default function UserProfileForm() {
 
             {/* Dietary Restrictions */}
             <div className="space-y-3">
-              <label>Dietary Restrictions</label>
+              <p>Dietary Restrictions</p>
               <div className="space-y-2">
                 {dietaryRestrictionOptions.map((option) => (
                   <div
                     key={option.value}
                     className="flex items-center space-x-2"
                   >
-                    <input
+                    <Checkbox
                       id={`diet-${option.value}`}
-                      type="checkbox"
-                      checked={user?.preferences?.dietaryRestrictions?.includes(
-                        option.value
-                      )}
-                      onChange={(e) =>
-                        handlePreferenceChange(
-                          'dietaryRestrictions',
-                          e.target.checked
-                            ? [
-                                ...(user?.preferences?.dietaryRestrictions ||
-                                  []),
-                                option.value,
-                              ]
-                            : user?.preferences?.dietaryRestrictions?.filter(
-                                (r) => r !== option.value
-                              ) || []
-                        )
+                      label={option.label}
+                      field="dietaryRestrictions"
+                      value={option.value}
+                      isChecked={
+                        user?.preferences?.dietaryRestrictions?.includes(
+                          option.value
+                        ) || false
                       }
+                      handleChange={handleArrayPreferenceChange}
                     />
-                    <label
-                      htmlFor={`diet-${option.value}`}
-                      className="cursor-pointer font-normal"
-                    >
-                      {option.label}
-                    </label>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Save Button */}
-            <div className="pt-4 border-t">
-              <button
-                type="submit"
-                className="w-full md:w-auto"
-                onClick={handlePreferenceSubmit}
-              >
-                Save Preferences
-              </button>
+            <div className="pt-4">
+              <div className="pt-4 border-t flex justify-end">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  onClick={handlePreferenceSubmit}
+                >
+                  Save Preferences
+                </Button>
+              </div>
             </div>
           </Card>
         </div>
