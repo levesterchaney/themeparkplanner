@@ -1,4 +1,4 @@
-import { authService } from '@/services/auth';
+import { authService } from '@/services';
 import { apiClient } from '@/lib/api-client';
 
 // Mock the API client

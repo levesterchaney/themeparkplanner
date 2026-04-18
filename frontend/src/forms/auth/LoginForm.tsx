@@ -1,14 +1,16 @@
 'use client';
 
-import { authService } from '@/services/auth';
+import { authService } from '@/services';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { LoginRequestData } from '@/types/api';
+import { useSession } from '@/contexts/SessionContext';
 
 export default function LoginForm() {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { setIsAuthenticated } = useSession();
 
   const login = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,6 +25,7 @@ export default function LoginForm() {
 
     try {
       await authService.login(data);
+      setIsAuthenticated(true); // Update session context
       //TODO Redirect to login page once implemented
       router.push('/');
     } catch (error: unknown) {

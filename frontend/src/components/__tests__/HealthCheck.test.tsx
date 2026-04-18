@@ -10,7 +10,7 @@ jest.mock('@/services/health', () => ({
   },
 }));
 
-import { healthService } from '@/services/health';
+import { healthService } from '@/services';
 
 const mockHealthService = healthService as jest.Mocked<typeof healthService>;
 

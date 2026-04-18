@@ -1,3 +1,10 @@
+// Global auth failure handler - will be set by SessionProvider
+let globalAuthFailureHandler: (() => void) | null = null;
+
+export const setGlobalAuthHandler = (handler: () => void) => {
+  globalAuthFailureHandler = handler;
+};
+
 class ApiClient {
   private baseURL: string;
 
@@ -26,6 +33,17 @@ class ApiClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+
+        // Handle auth failures globally
+        if (
+          (response.status === 401 || response.status === 403) &&
+          globalAuthFailureHandler
+        ) {
+          globalAuthFailureHandler();
+          // Don't throw the error for auth failures as they're handled globally
+          return {} as T;
+        }
+
         throw new ApiError({
           message:
             errorData.message || `HTTP error! status: ${response.status}`,

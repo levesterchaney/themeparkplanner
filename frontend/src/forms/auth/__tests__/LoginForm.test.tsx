@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import LoginForm from '@/components/auth/LoginForm';
+import LoginForm from '@/forms/auth/LoginForm';
+import { SessionProvider } from '@/contexts/SessionContext';
 
 // Mock the auth service
 jest.mock('@/services/auth', () => ({
@@ -18,9 +19,14 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
-import { authService } from '@/services/auth';
+import { authService } from '@/services';
 
 const mockAuthService = authService as jest.Mocked<typeof authService>;
+
+// Test wrapper to provide SessionContext
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <SessionProvider initialAuth={false}>{children}</SessionProvider>
+);
 
 describe('LoginForm Component', () => {
   beforeEach(() => {
@@ -28,7 +34,7 @@ describe('LoginForm Component', () => {
   });
 
   test('renders login form correctly', () => {
-    render(<LoginForm />);
+    render(<LoginForm />, { wrapper: TestWrapper });
 
     expect(screen.getByPlaceholderText(/email address/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
@@ -48,7 +54,7 @@ describe('LoginForm Component', () => {
       user_id: 1,
     });
 
-    render(<LoginForm />);
+    render(<LoginForm />, { wrapper: TestWrapper });
 
     await user.type(
       screen.getByPlaceholderText(/email address/i),
@@ -75,7 +81,7 @@ describe('LoginForm Component', () => {
       details: { error: 'Invalid credentials' },
     });
 
-    render(<LoginForm />);
+    render(<LoginForm />, { wrapper: TestWrapper });
 
     await user.type(
       screen.getByPlaceholderText(/email address/i),
@@ -97,7 +103,7 @@ describe('LoginForm Component', () => {
       () => new Promise(() => {}) // Never resolves
     );
 
-    render(<LoginForm />);
+    render(<LoginForm />, { wrapper: TestWrapper });
 
     await user.type(
       screen.getByPlaceholderText(/email address/i),
@@ -116,7 +122,7 @@ describe('LoginForm Component', () => {
     const user = userEvent.setup();
     mockAuthService.login.mockRejectedValue(new Error('Network error'));
 
-    render(<LoginForm />);
+    render(<LoginForm />, { wrapper: TestWrapper });
 
     await user.type(
       screen.getByPlaceholderText(/email address/i),
@@ -136,7 +142,7 @@ describe('LoginForm Component', () => {
     const user = userEvent.setup();
     mockAuthService.login.mockRejectedValue({});
 
-    render(<LoginForm />);
+    render(<LoginForm />, { wrapper: TestWrapper });
 
     await user.type(
       screen.getByPlaceholderText(/email address/i),

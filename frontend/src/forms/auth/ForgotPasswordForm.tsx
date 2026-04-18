@@ -1,6 +1,6 @@
 'use client';
 
-import { authService } from '@/services/auth';
+import { authService } from '@/services';
 import { useState } from 'react';
 import { ForgotPasswordRequestData } from '@/types/api';
 

@@ -1,7 +1,9 @@
+import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import LogoutPage from '@/app/logout/page';
-import { authService } from '@/services/auth';
+import { authService } from '@/services';
+import { SessionProvider } from '@/contexts/SessionContext';
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -18,6 +20,11 @@ jest.mock('@/services/auth', () => ({
 const mockUseRouter = useRouter as jest.Mock;
 const mockAuthService = authService as jest.Mocked<typeof authService>;
 
+// Test wrapper to provide SessionContext
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <SessionProvider initialAuth={true}>{children}</SessionProvider>
+);
+
 describe('LogoutPage', () => {
   const mockPush = jest.fn();
 
@@ -29,7 +36,7 @@ describe('LogoutPage', () => {
   });
 
   it('renders logout message and spinner', () => {
-    render(<LogoutPage />);
+    render(<LogoutPage />, { wrapper: TestWrapper });
 
     expect(screen.getByText('Logging you out...')).toBeInTheDocument();
 
@@ -52,7 +59,7 @@ describe('LogoutPage', () => {
   it('calls authService.logout on mount', async () => {
     mockAuthService.logout.mockResolvedValue(undefined);
 
-    render(<LogoutPage />);
+    render(<LogoutPage />, { wrapper: TestWrapper });
 
     await waitFor(() => {
       expect(mockAuthService.logout).toHaveBeenCalledTimes(1);
@@ -62,7 +69,7 @@ describe('LogoutPage', () => {
   it('redirects to login page on successful logout', async () => {
     mockAuthService.logout.mockResolvedValue(undefined);
 
-    render(<LogoutPage />);
+    render(<LogoutPage />, { wrapper: TestWrapper });
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/login');
@@ -72,7 +79,7 @@ describe('LogoutPage', () => {
   it('redirects to home page on logout failure', async () => {
     mockAuthService.logout.mockRejectedValue(new Error('Logout failed'));
 
-    render(<LogoutPage />);
+    render(<LogoutPage />, { wrapper: TestWrapper });
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/');
@@ -80,7 +87,7 @@ describe('LogoutPage', () => {
   });
 
   it('has correct CSS structure and classes', () => {
-    const { container } = render(<LogoutPage />);
+    const { container } = render(<LogoutPage />, { wrapper: TestWrapper });
 
     const mainDiv = container.firstChild;
     expect(mainDiv).toHaveClass(
@@ -95,7 +102,7 @@ describe('LogoutPage', () => {
   });
 
   it('renders heading with correct styling', () => {
-    render(<LogoutPage />);
+    render(<LogoutPage />, { wrapper: TestWrapper });
 
     const heading = screen.getByRole('heading', { level: 2 });
     expect(heading).toHaveClass(
@@ -111,7 +118,7 @@ describe('LogoutPage', () => {
   it('only calls logout once even with multiple re-renders', async () => {
     mockAuthService.logout.mockResolvedValue(undefined);
 
-    const { rerender } = render(<LogoutPage />);
+    const { rerender } = render(<LogoutPage />, { wrapper: TestWrapper });
 
     // Re-render the component
     rerender(<LogoutPage />);
@@ -125,7 +132,7 @@ describe('LogoutPage', () => {
     const networkError = new Error('Network error');
     mockAuthService.logout.mockRejectedValue(networkError);
 
-    render(<LogoutPage />);
+    render(<LogoutPage />, { wrapper: TestWrapper });
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/');

@@ -16,7 +16,7 @@ jest.mock('@/services/auth', () => ({
 }));
 
 // Mock the ForgotPasswordForm component
-jest.mock('@/components/auth/ForgotPasswordForm', () => {
+jest.mock('@/forms/auth/ForgotPasswordForm', () => {
   return function MockedForgotPasswordForm() {
     return (
       <div data-testid="forgot-password-form">Mocked ForgotPasswordForm</div>

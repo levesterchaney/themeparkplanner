@@ -1,0 +1,68 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useSession } from '@/contexts/SessionContext';
+import { authService } from '@/services';
+import { Button } from '@/components';
+
+export default function HeaderNav() {
+  // const location = usePathname();
+  const router = useRouter();
+  const { isAuthenticated, setIsAuthenticated } = useSession();
+
+  const navigate = (path: string) => {
+    router.push(path);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      setIsAuthenticated(false);
+      router.push('/');
+    } catch {
+      // Even if logout fails, clear the session
+      setIsAuthenticated(false);
+      router.push('/');
+    }
+  };
+
+  // const isActive = (path: string) => {
+  //   return location === path;
+  // };
+
+  return (
+    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => navigate('/')}
+          >
+            <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-2 rounded-lg" />
+            <h1 className="text-xl font-semibold dark:text-white">
+              Theme Park Planner
+            </h1>
+          </div>
+
+          {isAuthenticated && (
+            <div className="flex items-center gap-4">
+              <nav className="hidden md:flex gap-2">
+                <Button onClick={() => navigate('/trips')}>My Trips</Button>
+                <Button onClick={() => navigate('/profile')}>Account</Button>
+                <Button onClick={handleLogout}>Logout</Button>
+              </nav>
+            </div>
+          )}
+
+          {!isAuthenticated && (
+            <div className="flex items-center gap-4">
+              <nav className="hidden md:flex gap-2">
+                <Button onClick={() => navigate('/login')}>Login</Button>
+              </nav>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}
