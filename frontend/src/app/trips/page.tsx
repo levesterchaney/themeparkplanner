@@ -1,8 +1,20 @@
 'use client';
 
-import { Button } from '@/components';
+import { Button, TabPanel } from '@/components';
 
 export default function MyTripsSummaryPage() {
+  const content = [
+    {
+      id: 'upcoming-trips',
+      label: 'Upcoming',
+      content: <div>Placeholder upcoming trip content</div>,
+    },
+    {
+      id: 'past-trips',
+      label: 'Past',
+      content: <div>Placeholder past trip content</div>,
+    },
+  ];
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Page heading */}
@@ -17,6 +29,8 @@ export default function MyTripsSummaryPage() {
           <Button disabled={true}>Create New Trip</Button>
         </div>
       </div>
+
+      <TabPanel tabs={content} />
     </div>
   );
 }

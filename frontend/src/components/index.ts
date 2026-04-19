@@ -7,6 +7,7 @@ export { default as Dropdown } from './base/Dropdown';
 export { default as Header } from './HeaderNav';
 export { default as Label } from './base/Label';
 export { default as Numberbox } from './base/Numberbox';
+export { default as TabPanel } from './TabPanel';
 export { default as Textbox } from './base/Textbox';
 
 export { default as HealthCheck } from './HealthCheck';
