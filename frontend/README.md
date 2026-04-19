@@ -6,11 +6,13 @@ A modern Next.js frontend application for planning theme park visits with real-t
 
 - **Modern UI/UX** - Clean, responsive design with Tailwind CSS
 - **Complete Authentication System** - Registration, login, logout, and password reset
+- **Navigation Component** - Responsive header with authentication state management
 - **Password Recovery** - Secure email-based password reset flow
 - **Real-time Health Monitoring** - Backend API status dashboard
 - **Responsive Design** - Mobile-first approach with dark mode support
 - **Type Safety** - Full TypeScript implementation
-- **Comprehensive Testing** - 154 tests passing with Jest + React Testing Library
+- **Comprehensive Testing** - 168+ tests passing with Jest + React Testing Library
+- **Component Testing** - Full test coverage for all UI components including HeaderNav
 - **Performance Optimized** - Next.js App Router with static generation
 
 ## 🏗️ Architecture
@@ -41,7 +43,7 @@ frontend/
 
 ## 🛠️ Technology Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/) - React framework with App Router
+- **Framework**: [Next.js 16](https://nextjs.org/) - React framework with App Router
 - **Language**: [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
 - **Components**: [React 19](https://react.dev/) - Latest React with concurrent features
@@ -261,8 +263,9 @@ npm run test:watch
 # Run tests with coverage
 npm run test:coverage
 
-# Current test status: 154 tests passing
-# Covers all authentication flows including password reset
+# Current test status: 168+ tests passing
+# Covers all authentication flows, navigation, and UI components
+# Includes comprehensive HeaderNav component testing
 ```
 
 ### Test Structure

@@ -1,12 +1,12 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from '@/contexts/SessionContext';
 import { authService } from '@/services';
 import { Button } from '@/components';
 
 export default function HeaderNav() {
-  // const location = usePathname();
+  const location = usePathname();
   const router = useRouter();
   const { isAuthenticated, setIsAuthenticated } = useSession();
 
@@ -26,9 +26,9 @@ export default function HeaderNav() {
     }
   };
 
-  // const isActive = (path: string) => {
-  //   return location === path;
-  // };
+  const isActive = (path: string) => {
+    return location === path;
+  };
 
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
@@ -47,8 +47,18 @@ export default function HeaderNav() {
           {isAuthenticated && (
             <div className="flex items-center gap-4">
               <nav className="hidden md:flex gap-2">
-                <Button onClick={() => navigate('/trips')}>My Trips</Button>
-                <Button onClick={() => navigate('/profile')}>Account</Button>
+                <Button
+                  variant={isActive('/trips') ? 'primary' : 'ghost'}
+                  onClick={() => navigate('/trips')}
+                >
+                  My Trips
+                </Button>
+                <Button
+                  variant={isActive('/profile') ? 'primary' : 'ghost'}
+                  onClick={() => navigate('/profile')}
+                >
+                  Account
+                </Button>
                 <Button onClick={handleLogout}>Logout</Button>
               </nav>
             </div>
@@ -57,7 +67,12 @@ export default function HeaderNav() {
           {!isAuthenticated && (
             <div className="flex items-center gap-4">
               <nav className="hidden md:flex gap-2">
-                <Button onClick={() => navigate('/login')}>Login</Button>
+                <Button
+                  variant={isActive('/login') ? 'primary' : 'ghost'}
+                  onClick={() => navigate('/login')}
+                >
+                  Login
+                </Button>
               </nav>
             </div>
           )}
