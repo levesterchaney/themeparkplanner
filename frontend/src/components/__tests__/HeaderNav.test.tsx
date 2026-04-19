@@ -1,12 +1,13 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from '@/contexts/SessionContext';
 import { authService } from '@/services';
 import HeaderNav from '../HeaderNav';
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  usePathname: jest.fn(),
 }));
 
 jest.mock('@/contexts/SessionContext', () => ({
@@ -31,6 +32,7 @@ jest.mock('@/components', () => ({
 
 const mockPush = jest.fn();
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>;
+const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>;
 const mockUseSession = useSession as jest.MockedFunction<typeof useSession>;
 const mockAuthService = authService as jest.Mocked<typeof authService>;
 
@@ -40,6 +42,7 @@ describe('HeaderNav', () => {
     mockUseRouter.mockReturnValue({
       push: mockPush,
     } as Response);
+    mockUsePathname.mockReturnValue('/');
     mockAuthService.logout.mockClear();
   });
 
