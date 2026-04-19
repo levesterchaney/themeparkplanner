@@ -44,6 +44,13 @@ Add these badges to your README:
 ![Full Stack CI](https://github.com/yourusername/themeparkplanner/workflows/Full%20Stack%20CI/badge.svg)
 ```
 
+## Test Coverage
+
+### Current Status
+- **Backend**: 55 tests passing with 89% coverage
+- **Frontend**: 170+ tests passing with comprehensive UI coverage
+- **Components**: Includes TabPanel, HeaderNav, and all authentication flows
+
 ## Configuration
 
 ### Backend Environment Variables
@@ -53,6 +60,11 @@ Add these badges to your README:
 
 ### Frontend Environment Variables
 - `NEXT_PUBLIC_API_BASE_URL`: Backend API URL
+
+### Secrets Configuration
+Set these in your GitHub repository secrets:
+- `CODECOV_TOKEN`: For coverage reporting (optional)
+- `DATABASE_URL`: For integration tests
 
 ## Local Development
 
