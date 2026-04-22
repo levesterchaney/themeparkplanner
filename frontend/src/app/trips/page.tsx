@@ -1,8 +1,22 @@
 'use client';
 
 import { Button, TabPanel } from '@/components';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { tripService } from '@/services';
+import { TripDetailResponseData } from '@/services/trip';
 
 export default function MyTripsSummaryPage() {
+  const router = useRouter();
+  const [upcomingTripList, setUpcomingTripList] = useState<
+    TripDetailResponseData[]
+  >([]);
+  const [pastTripList, setPastTripList] = useState<TripDetailResponseData[]>(
+    []
+  );
+  console.log(upcomingTripList); //TODO remove
+  console.log(pastTripList); //TODO remove
+
   const content = [
     {
       id: 'upcoming-trips',
@@ -15,6 +29,23 @@ export default function MyTripsSummaryPage() {
       content: <div>Placeholder past trip content</div>,
     },
   ];
+
+  const openTripCreation = () => {
+    router.push('/trips/new');
+  };
+
+  useEffect(() => {
+    const fetchUserTripData = async () => {
+      const upcomingTrips = await tripService.getUpcomingTrips();
+      const pastTrips = await tripService.getPastTrips();
+
+      setUpcomingTripList(upcomingTrips);
+      setPastTripList(pastTrips);
+    };
+
+    fetchUserTripData();
+  });
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Page heading */}
@@ -26,7 +57,7 @@ export default function MyTripsSummaryPage() {
           </p>
         </div>
         <div className="flex justify-end">
-          <Button disabled={true}>Create New Trip</Button>
+          <Button onClick={() => openTripCreation()}>Create New Trip</Button>
         </div>
       </div>
 

@@ -53,3 +53,12 @@ export interface UserPreferenceRequestData {
   accessibilityNeeds?: string[];
   dietaryRestrictions?: string[];
 }
+
+export interface NewTripRequestData {
+  title: string;
+  destination: string;
+  startDate: Date;
+  endDate: Date;
+  partySize: number;
+  hasKids: boolean;
+}
