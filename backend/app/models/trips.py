@@ -2,6 +2,7 @@ from sqlalchemy import (
     JSON,
     Boolean,
     Column,
+    Date,
     DateTime,
     ForeignKey,
     Integer,
@@ -24,8 +25,8 @@ class Trip(Base):
     user_id = Column(ForeignKey("users.id"), index=True, nullable=False)
     title = Column(String(255), nullable=False)
     destination = Column(String(255))
-    start_date = Column(DateTime(timezone=True), nullable=False)
-    end_date = Column(DateTime(timezone=True), nullable=False)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
     party_size = Column(Integer, default=2, nullable=False)
     has_kids = Column(Boolean, default=False, nullable=False)
     notes = Column(Text)
@@ -56,7 +57,7 @@ class Itinerary(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     trip_id = Column(ForeignKey("trips.id"), index=True, nullable=False)
-    day_date = Column(DateTime(timezone=True), nullable=False)
+    day_date = Column(Date, nullable=False)
     title = Column(String(255))
     must_dos = Column(ARRAY(String(255)))
     skip_list = Column(ARRAY(String(255)))

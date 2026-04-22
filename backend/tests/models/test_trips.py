@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from app.models.trips import Itinerary, ItineraryItem, ItineraryPark, Trip
 
@@ -8,7 +8,7 @@ class TestTrip:
 
     def test_trip_creation(self):
         """Test basic trip creation."""
-        start_date = datetime.now()
+        start_date = date.today()
         end_date = start_date + timedelta(days=3)
 
         trip = Trip(
@@ -27,7 +27,7 @@ class TestTrip:
 
     def test_trip_default_values(self):
         """Test trip default values."""
-        start_date = datetime.now()
+        start_date = date.today()
         end_date = start_date + timedelta(days=3)
 
         # Test that defaults are applied correctly
@@ -55,7 +55,7 @@ class TestItinerary:
 
     def test_itinerary_creation(self):
         """Test basic itinerary creation."""
-        day_date = datetime.now()
+        day_date = date.today()
 
         itinerary = Itinerary(
             trip_id=1, day_date=day_date, title="Morning at Magic Kingdom"
