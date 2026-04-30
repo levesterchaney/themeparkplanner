@@ -108,6 +108,8 @@ async def get_individual_trips(
     )
     trip = trip.scalar()
 
+    print(f"DEBUG - trip in question => {trip_id}")
+    print(f"DEBUG - trip found => {trip}")
     if trip is None:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"message": "Trip not found"}

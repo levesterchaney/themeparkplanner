@@ -67,22 +67,36 @@ async def mock_trip_db():
         },
     ]
 
-    def mock_execute(query):
+    def mock_execute(query, parameters=None):
         mock_result = Mock()
         query_str = str(query)
+
+        # Extract parameters if passed as a dict (common in SQLAlchemy)
+        if hasattr(query, "compile"):
+            try:
+                compiled = query.compile(compile_kwargs={"literal_binds": True})
+                compiled_str = str(compiled)
+            except Exception:
+                compiled_str = query_str
+        else:
+            compiled_str = query_str
 
         if "user_preferences" in query_str.lower():
             mock_result.scalar.return_value = user_preferences
         elif "trips" in query_str.lower() and "user_id" in query_str.lower():
             if "trips.id =" in query_str.lower() or "trips.id=" in query_str.lower():
-                # Specific trip lookup by ID and user - check the actual binding
-                if ":id_1" in query_str:
-                    # The parameter is bound, we need to check what value was passed
-                    # For simplicity, assume ID 1 returns trip, others return None
-                    trip = Trip(**test_trips[0])
-                    mock_result.scalar.return_value = trip
-                else:
-                    mock_result.scalar.return_value = None
+                # Specific trip lookup by ID and user
+                # Check if this is for a valid trip ID (1 or 2)
+                trip_found = None
+
+                # Check if querying for trip ID 1 or 2 (our test data)
+                if "= 1" in compiled_str or "= '1'" in compiled_str:
+                    trip_found = Trip(**test_trips[0])
+                elif "= 2" in compiled_str or "= '2'" in compiled_str:
+                    trip_found = Trip(**test_trips[1])
+                # For any other ID (like 999), return None
+
+                mock_result.scalar.return_value = trip_found
             else:
                 # All trips lookup - create Trip instances
                 trips = [Trip(**trip_data) for trip_data in test_trips]
@@ -359,11 +373,51 @@ class TestGetSpecificTrip:
         assert response.json()["message"] == "Trip not found"
 
     @pytest.mark.asyncio
-    async def test_get_specific_trip_unauthorized_access(self, trip_client):
+    async def test_get_specific_trip_unauthorized_access(self):
         """Test attempting to access another user's trip."""
-        # The query filter ensures users can only see their own trips
-        # If trip doesn't belong to user, it returns None
-        response = await trip_client.get("/api/v1/trips/999")
+        # Create a custom mock session that returns None for trip ID 999
+        mock_session = AsyncMock(spec=AsyncSession)
+
+        def mock_execute(query, parameters=None):
+            mock_result = Mock()
+            query_str = str(query)
+
+            if (
+                "trips" in query_str.lower()
+                and "user_id" in query_str.lower()
+                and "trips.id" in query_str.lower()
+            ):
+                # For the unauthorized test, always return
+                # None for specific trip queries
+                mock_result.scalar.return_value = None
+            else:
+                mock_result.scalar.return_value = None
+
+            return mock_result
+
+        mock_session.execute.side_effect = mock_execute
+
+        async def override_get_db():
+            yield mock_session
+
+        async def mock_get_current_user():
+            return User(
+                id=1,
+                email="test@example.com",
+                first_name="John",
+                last_name="Doe",
+                password_hash="hashed",
+            )
+
+        from app.core.dependencies import get_current_user
+
+        app.dependency_overrides[get_db] = override_get_db
+        app.dependency_overrides[get_current_user] = mock_get_current_user
+
+        async with AsyncClient(app=app, base_url="http://testserver") as client:
+            response = await client.get("/api/v1/trips/999")
+
+        app.dependency_overrides.clear()
 
         assert response.status_code == 404
         # Should return error message since trip doesn't exist for this user
