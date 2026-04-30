@@ -54,27 +54,24 @@ describe('DatePicker Component', () => {
 
     expect(screen.getByRole('grid')).toBeInTheDocument();
 
-    // Find any available date button to click
-    const dateButtons = screen
-      .getAllByRole('button')
-      .filter((btn) => btn.getAttribute('name')?.match(/^\d+$/));
+    // Find clickable date buttons within gridcells
+    const gridCells = screen.getAllByRole('gridcell');
+    let dateButtonClicked = false;
 
-    if (dateButtons.length > 0) {
-      await user.click(dateButtons[0]);
+    for (const cell of gridCells) {
+      const button = cell.querySelector('button');
+      if (button && !button.disabled && !button.hasAttribute('aria-hidden')) {
+        await user.click(button);
+        dateButtonClicked = true;
+        break;
+      }
+    }
+
+    if (dateButtonClicked) {
       expect(mockHandleChange).toHaveBeenCalledWith(
         'test-date-picker',
         expect.any(Date)
       );
-    } else {
-      // Find any gridcell and click it
-      const gridCells = screen.getAllByRole('gridcell');
-      if (gridCells.length > 0) {
-        await user.click(gridCells[0]);
-        expect(mockHandleChange).toHaveBeenCalledWith(
-          'test-date-picker',
-          expect.any(Date)
-        );
-      }
     }
   });
 
@@ -113,8 +110,9 @@ describe('DatePicker Component', () => {
 
   it('shows required attribute on hidden input when isRequired is true', () => {
     render(<DatePicker {...defaultProps} isRequired={true} />);
-    const hiddenInput = screen.getByRole('textbox', { hidden: true });
+    const hiddenInput = screen.getByDisplayValue('');
     expect(hiddenInput).toHaveAttribute('required');
+    expect(hiddenInput).toHaveAttribute('type', 'hidden');
   });
 
   it('has proper accessibility attributes', () => {

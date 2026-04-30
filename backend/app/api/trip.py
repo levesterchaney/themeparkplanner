@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Response, status
 from pydantic import BaseModel
@@ -20,6 +20,22 @@ class TripCreationData(BaseModel):
     end_date: date
     party_size: Optional[int] = None
     has_kids: Optional[bool] = None
+
+
+class TripResponse(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    destination: str
+    start_date: date
+    end_date: date
+    party_size: int
+    has_kids: bool
+    notes: Optional[str] = None
+    status: str
+
+    class Config:
+        from_attributes = True
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -66,7 +82,7 @@ async def create_trip(
     return {"message": "Trip created successfully", "trip_id": new_trip.id}
 
 
-@router.get("", status_code=status.HTTP_200_OK)
+@router.get("", status_code=status.HTTP_200_OK, response_model=List[TripResponse])
 async def get_all_trips(
     response: Response,
     current_user: User = Depends(get_current_user),
@@ -76,20 +92,24 @@ async def get_all_trips(
     trips = await db.execute(select(Trip).where(Trip.user_id == current_user.id))
     trip_list = trips.scalars().all()
 
-    return trip_list
+    return [TripResponse.from_orm(trip) for trip in trip_list]
 
 
 @router.get("/{trip_id}", status_code=status.HTTP_200_OK)
 async def get_individual_trips(
-    trip_id,
+    trip_id: int,
     response: Response,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """"""
     trip = await db.execute(
-        select(Trip).where(Trip.user_id == current_user.id and Trip.id == trip_id)
+        select(Trip).where(Trip.user_id == current_user.id, Trip.id == trip_id)
     )
     trip = trip.scalar()
 
-    return trip
+    if trip is None:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"message": "Trip not found"}
+
+    return TripResponse.from_orm(trip)

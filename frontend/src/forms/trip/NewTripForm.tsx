@@ -68,12 +68,16 @@ export default function NewTripForm() {
 
   useEffect(() => {
     const fetchUserPreferences = async () => {
-      const user = await userService.getProfile();
-      setTripData((prev) => ({
-        ...prev,
-        hasKids: user.preferences?.hasKids || false,
-        partySize: user.preferences?.defaultPartySize || 2,
-      }));
+      try {
+        const user = await userService.getProfile();
+        setTripData((prev) => ({
+          ...prev,
+          hasKids: user.preferences?.hasKids || false,
+          partySize: user.preferences?.defaultPartySize || 2,
+        }));
+      } catch (error) {
+        console.error('Failed to fetch user preferences:', error);
+      }
     };
 
     fetchUserPreferences();
@@ -81,23 +85,28 @@ export default function NewTripForm() {
 
   useEffect(() => {
     const fetchDestinations = async () => {
-      const parkList = await parkService.getParkList();
-      const seen: string[] = [];
-      let destinationList: DestinationOption[] = [];
+      try {
+        const parkList = await parkService.getParkList();
+        const seen: string[] = [];
+        let destinationList: DestinationOption[] = [];
 
-      parkList.forEach((park) => {
-        if (!seen.includes(park.resort_name)) {
-          seen.push(park.resort_name);
-          destinationList.push({
-            label: park.resort_name,
-            value: park.resort_name,
-          });
-        }
-      });
-      destinationList = destinationList.sort((a, b) =>
-        a.label.localeCompare(b.label)
-      );
-      setDestinationOptions(destinationList);
+        parkList.forEach((park) => {
+          if (!seen.includes(park.resort_name)) {
+            seen.push(park.resort_name);
+            destinationList.push({
+              label: park.resort_name,
+              value: park.resort_name,
+            });
+          }
+        });
+        destinationList = destinationList.sort((a, b) =>
+          a.label.localeCompare(b.label)
+        );
+        setDestinationOptions(destinationList);
+      } catch (error) {
+        console.error('Failed to fetch destinations:', error);
+        setDestinationOptions([]);
+      }
     };
 
     fetchDestinations();
