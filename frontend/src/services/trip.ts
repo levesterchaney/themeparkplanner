@@ -19,10 +19,18 @@ export const tripService = {
     return apiClient.post('/api/v1/trips', data);
   },
   getUpcomingTrips: async (): Promise<TripDetailResponseData[]> => {
-    return await apiClient.get('/api/v1/trips');
+    const allTrips: TripDetailResponseData[] =
+      await apiClient.get('/api/v1/trips');
+    return allTrips.filter(
+      (trip) => trip.start_date > new Date().toISOString()
+    );
   },
   getPastTrips: async (): Promise<TripDetailResponseData[]> => {
-    return apiClient.get('/api/v1/trips');
+    const allTrips: TripDetailResponseData[] =
+      await apiClient.get('/api/v1/trips');
+    return allTrips.filter(
+      (trip) => trip.start_date <= new Date().toISOString()
+    );
   },
   getSpecificTrip: async (tripId: string): Promise<TripDetailResponseData> => {
     return apiClient.get(`/api/v1/trips/${tripId}`);

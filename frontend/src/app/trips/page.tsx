@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, TabPanel } from '@/components';
+import { Button, TabPanel, TripCard } from '@/components';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { tripService } from '@/services';
@@ -8,6 +8,7 @@ import { TripDetailResponseData } from '@/services/trip';
 
 export default function MyTripsSummaryPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [upcomingTripList, setUpcomingTripList] = useState<
     TripDetailResponseData[]
   >([]);
@@ -20,13 +21,35 @@ export default function MyTripsSummaryPage() {
   const content = [
     {
       id: 'upcoming-trips',
-      label: 'Upcoming',
-      content: <div>Placeholder upcoming trip content</div>,
+      label: `Upcoming (${upcomingTripList.length})`,
+      content: (
+        <TripCard
+          title={upcomingTripList[0] ? upcomingTripList[0].title : ''}
+          destination={
+            upcomingTripList[0] ? upcomingTripList[0].destination : ''
+          }
+          dateRange={
+            upcomingTripList[0]
+              ? `${upcomingTripList[0].start_date} - ${upcomingTripList[0].end_date}`
+              : ''
+          }
+        />
+      ),
     },
     {
       id: 'past-trips',
-      label: 'Past',
-      content: <div>Placeholder past trip content</div>,
+      label: `Past (${pastTripList.length})`,
+      content: (
+        <TripCard
+          title={pastTripList[0] ? pastTripList[0].title : ''}
+          destination={pastTripList[0] ? pastTripList[0].destination : ''}
+          dateRange={
+            pastTripList[0]
+              ? `${pastTripList[0].start_date} - ${pastTripList[0].end_date}`
+              : ''
+          }
+        />
+      ),
     },
   ];
 
@@ -36,15 +59,17 @@ export default function MyTripsSummaryPage() {
 
   useEffect(() => {
     const fetchUserTripData = async () => {
+      setLoading(true);
       const upcomingTrips = await tripService.getUpcomingTrips();
       const pastTrips = await tripService.getPastTrips();
 
       setUpcomingTripList(upcomingTrips);
       setPastTripList(pastTrips);
+      setLoading(false);
     };
 
     fetchUserTripData();
-  });
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -61,7 +86,7 @@ export default function MyTripsSummaryPage() {
         </div>
       </div>
 
-      <TabPanel tabs={content} />
+      {loading ? <div /> : <TabPanel tabs={content} />}
     </div>
   );
 }
