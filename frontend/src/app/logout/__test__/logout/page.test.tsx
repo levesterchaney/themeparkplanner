@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import LogoutPage from '@/app/logout/page';
 import { authService } from '@/services';
@@ -59,7 +59,9 @@ describe('LogoutPage', () => {
   it('calls authService.logout on mount', async () => {
     mockAuthService.logout.mockResolvedValue(undefined);
 
-    render(<LogoutPage />, { wrapper: TestWrapper });
+    await act(async () => {
+      render(<LogoutPage />, { wrapper: TestWrapper });
+    });
 
     await waitFor(() => {
       expect(mockAuthService.logout).toHaveBeenCalledTimes(1);
@@ -69,7 +71,9 @@ describe('LogoutPage', () => {
   it('redirects to login page on successful logout', async () => {
     mockAuthService.logout.mockResolvedValue(undefined);
 
-    render(<LogoutPage />, { wrapper: TestWrapper });
+    await act(async () => {
+      render(<LogoutPage />, { wrapper: TestWrapper });
+    });
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/login');
@@ -79,7 +83,9 @@ describe('LogoutPage', () => {
   it('redirects to home page on logout failure', async () => {
     mockAuthService.logout.mockRejectedValue(new Error('Logout failed'));
 
-    render(<LogoutPage />, { wrapper: TestWrapper });
+    await act(async () => {
+      render(<LogoutPage />, { wrapper: TestWrapper });
+    });
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/');
@@ -118,10 +124,14 @@ describe('LogoutPage', () => {
   it('only calls logout once even with multiple re-renders', async () => {
     mockAuthService.logout.mockResolvedValue(undefined);
 
-    const { rerender } = render(<LogoutPage />, { wrapper: TestWrapper });
+    const { rerender } = await act(async () => {
+      return render(<LogoutPage />, { wrapper: TestWrapper });
+    });
 
     // Re-render the component
-    rerender(<LogoutPage />);
+    await act(async () => {
+      rerender(<LogoutPage />);
+    });
 
     await waitFor(() => {
       expect(mockAuthService.logout).toHaveBeenCalledTimes(1);
@@ -132,7 +142,9 @@ describe('LogoutPage', () => {
     const networkError = new Error('Network error');
     mockAuthService.logout.mockRejectedValue(networkError);
 
-    render(<LogoutPage />, { wrapper: TestWrapper });
+    await act(async () => {
+      render(<LogoutPage />, { wrapper: TestWrapper });
+    });
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/');

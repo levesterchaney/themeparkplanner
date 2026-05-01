@@ -3,7 +3,7 @@
 interface TextboxProps {
   id: string;
   label: string;
-  value: string;
+  value?: string;
   isRequired?: boolean;
   isDisabled?: boolean;
   handleChange: (id: string, value: string) => void;
@@ -12,7 +12,7 @@ interface TextboxProps {
 export default function Textbox({
   id,
   label,
-  value,
+  value = '',
   isRequired = false,
   isDisabled = false,
   handleChange = () => {},

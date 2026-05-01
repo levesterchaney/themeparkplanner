@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .api.health import router as health_router
 from .api.park import router as park_router
+from .api.trip import router as trip_router
 from .api.user import router as user_router
 from .api.user_auth import router as auth_router
 from .core.config import settings
@@ -58,6 +59,7 @@ app.include_router(health_router, prefix=settings.api_v1_str, tags=["health"])
 app.include_router(auth_router, prefix=settings.api_v1_str, tags=["auth"])
 app.include_router(user_router, prefix=settings.api_v1_str, tags=["users"])
 app.include_router(park_router, prefix=settings.api_v1_str, tags=["parks"])
+app.include_router(trip_router, prefix=settings.api_v1_str, tags=["trips"])
 
 
 @app.get("/")
