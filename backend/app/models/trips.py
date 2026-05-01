@@ -40,6 +40,7 @@ class Trip(Base):
         onupdate=func.now(),
         nullable=False,
     )
+    deleted = Column(Boolean, default=False, nullable=False)
 
     @validates("status")
     def validate_status(self, key, value):
