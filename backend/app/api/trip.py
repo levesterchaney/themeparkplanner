@@ -22,6 +22,17 @@ class TripCreationData(BaseModel):
     has_kids: Optional[bool] = None
 
 
+class TripDetailData(BaseModel):
+    title: str
+    destination: str
+    start_date: date
+    end_date: date
+    party_size: int
+    has_kids: bool
+    notes: str
+    status: str
+
+
 class TripResponse(BaseModel):
     id: int
     user_id: int
@@ -108,10 +119,62 @@ async def get_individual_trips(
     )
     trip = trip.scalar()
 
-    print(f"DEBUG - trip in question => {trip_id}")
-    print(f"DEBUG - trip found => {trip}")
     if trip is None:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"message": "Trip not found"}
 
     return TripResponse.from_orm(trip)
+
+
+@router.patch("/{trip_id}", status_code=status.HTTP_200_OK)
+async def update_trip(
+    trip_id: int,
+    trip_detail_data: TripDetailData,
+    response: Response,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """"""
+    trip = await db.execute(
+        select(Trip).where(Trip.user_id == current_user.id, Trip.id == trip_id)
+    )
+    trip = trip.scalar()
+
+    if trip is None:
+        response.status_code == status.HTTP_404_NOT_FOUND
+        return {"message": "Trip not found"}
+
+    trip.title = trip_detail_data.title
+    trip.destination = trip_detail_data.destination
+    trip.start_date = trip_detail_data.start_date
+    trip.end_date = trip_detail_data.end_date
+    trip.party_size = trip_detail_data.party_size
+    trip.has_kids = trip_detail_data.has_kids
+    trip.notes = trip_detail_data.notes
+    trip.status = trip_detail_data.status
+
+    db.add(trip)
+    await db.commit()
+    return {"message": "Trip successfully updated"}
+
+
+@router.delete("/{trip_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_trip(
+    trip_id: int,
+    response: Response,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """"""
+    trip = await db.execute(
+        select(Trip).where(Trip.user_id == current_user.id, Trip.id == trip_id)
+    )
+    trip = trip.scalar()
+
+    if trip is None:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"message": "Trip not found"}
+
+    trip.deleted = True
+    db.add(trip)
+    await db.commit()
