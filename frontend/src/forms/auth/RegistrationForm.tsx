@@ -26,14 +26,14 @@ export default function RegistrationForm() {
 
     const formData = new FormData(event.currentTarget);
     const data: RegistrationRequestData = {
-      firstName: formData.get('first-name') as string,
-      lastName: (formData.get('last-name') as string) || undefined,
+      first_name: formData.get('first-name') as string,
+      last_name: (formData.get('last-name') as string) || undefined,
       email: formData.get('email') as string,
       password: formData.get('password') as string,
     };
 
     // Basic validation
-    if (!data.firstName) {
+    if (!data.first_name) {
       setError('First name is required.');
       setLoading(false);
       return;

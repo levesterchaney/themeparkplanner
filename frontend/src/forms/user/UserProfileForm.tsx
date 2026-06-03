@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { userService } from '@/services';
+import { userService, UserProfileResponseData } from '@/services';
 import { UserPreferenceRequestData } from '@/types/api';
 import {
   Button,
@@ -12,21 +12,9 @@ import {
   Numberbox,
 } from '@/components';
 
-interface UserProfileResponseData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  avatar?: string;
-  preferences?: {
-    defaultPartySize?: number;
-    hasKids?: boolean;
-    thrillLevel?: 'low' | 'moderate' | 'high' | 'extreme';
-    accessibilityNeeds?: string[];
-    dietaryRestrictions?: string[];
-  };
-}
+// Using the centralized UserProfileResponseData from services/user.ts
 
-const thrillLevelOptions = [
+const thrill_level_options = [
   { label: 'Low - Gentle rides and shows', value: 'low' },
   { label: 'Medium - Mix of everything', value: 'moderate' },
   { label: 'High - Thrill rides and coasters', value: 'high' },
@@ -157,8 +145,8 @@ export default function UserProfileForm() {
 
       // Update user details
       await userService.updateProfile({
-        firstName: user.firstName,
-        lastName: user.lastName,
+        first_name: user.first_name,
+        last_name: user.last_name,
         avatarUrl: user.avatar || '',
       });
 
@@ -186,23 +174,23 @@ export default function UserProfileForm() {
       if (user.preferences) {
         const preferencesToUpdate: UserPreferenceRequestData = {};
 
-        if (user.preferences.defaultPartySize !== undefined) {
-          preferencesToUpdate.defaultPartySize =
-            user.preferences.defaultPartySize;
+        if (user.preferences.default_party_size !== undefined) {
+          preferencesToUpdate.default_party_size =
+            user.preferences.default_party_size;
         }
-        if (user.preferences.hasKids !== undefined) {
-          preferencesToUpdate.hasKids = user.preferences.hasKids;
+        if (user.preferences.has_kids !== undefined) {
+          preferencesToUpdate.has_kids = user.preferences.has_kids;
         }
-        if (user.preferences.thrillLevel !== undefined) {
-          preferencesToUpdate.thrillLevel = user.preferences.thrillLevel;
+        if (user.preferences.thrill_level !== undefined) {
+          preferencesToUpdate.thrill_level = user.preferences.thrill_level;
         }
-        if (user.preferences.accessibilityNeeds !== undefined) {
-          preferencesToUpdate.accessibilityNeeds =
-            user.preferences.accessibilityNeeds;
+        if (user.preferences.accessibility_needs !== undefined) {
+          preferencesToUpdate.accessibility_needs =
+            user.preferences.accessibility_needs;
         }
-        if (user.preferences.dietaryRestrictions !== undefined) {
-          preferencesToUpdate.dietaryRestrictions =
-            user.preferences.dietaryRestrictions;
+        if (user.preferences.dietary_restrictions !== undefined) {
+          preferencesToUpdate.dietary_restrictions =
+            user.preferences.dietary_restrictions;
         }
 
         // Only send the update if we have preferences to update
@@ -251,15 +239,15 @@ export default function UserProfileForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Textbox
                 label="First Name"
-                id="firstName"
-                value={user?.firstName || ''}
+                id="first_name"
+                value={user?.first_name || ''}
                 handleChange={handleInputChange}
                 isRequired={true}
               />
               <Textbox
                 label="Last Name"
-                id="lastName"
-                value={user?.lastName || ''}
+                id="last_name"
+                value={user?.last_name || ''}
                 handleChange={handleInputChange}
                 isRequired={true}
               />
@@ -300,8 +288,8 @@ export default function UserProfileForm() {
             <div className="space-y-2">
               <Numberbox
                 label="Party Size"
-                id="defaultPartySize"
-                value={user?.preferences?.defaultPartySize || 1}
+                id="default_party_size"
+                value={user?.preferences?.default_party_size || 1}
                 handleChange={handlePreferenceChange}
                 isRequired={true}
               />
@@ -314,10 +302,10 @@ export default function UserProfileForm() {
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="hasKids"
+                  id="has_kids"
                   label="Traveling with children"
-                  value={user?.preferences?.hasKids || false}
-                  isChecked={user?.preferences?.hasKids || false}
+                  value={user?.preferences?.has_kids || false}
+                  isChecked={user?.preferences?.has_kids || false}
                   handleChange={handleBooleanPreferenceChange}
                 />
               </div>
@@ -327,10 +315,10 @@ export default function UserProfileForm() {
             {/* Thrill Level */}
             <div className="space-y-2">
               <Dropdown
-                id="thrillLevel"
+                id="thrill_level"
                 label="Preferred Thrill Level"
-                current={user?.preferences?.thrillLevel || ''}
-                options={thrillLevelOptions}
+                current={user?.preferences?.thrill_level || ''}
+                options={thrill_level_options}
                 handleChange={handlePreferenceChange}
               />
             </div>
@@ -347,10 +335,10 @@ export default function UserProfileForm() {
                     <Checkbox
                       id={`access-${option.value}`}
                       label={option.label}
-                      field="accessibilityNeeds"
+                      field="accessibility_needs"
                       value={option.value}
                       isChecked={
-                        user?.preferences?.accessibilityNeeds?.includes(
+                        user?.preferences?.accessibility_needs?.includes(
                           option.value
                         ) || false
                       }
@@ -373,10 +361,10 @@ export default function UserProfileForm() {
                     <Checkbox
                       id={`diet-${option.value}`}
                       label={option.label}
-                      field="dietaryRestrictions"
+                      field="dietary_restrictions"
                       value={option.value}
                       isChecked={
-                        user?.preferences?.dietaryRestrictions?.includes(
+                        user?.preferences?.dietary_restrictions?.includes(
                           option.value
                         ) || false
                       }

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { setGlobalAuthHandler } from '@/lib/api-client';
+import { authService } from '@/services';
 
 interface SessionContextType {
   isAuthenticated: boolean;
@@ -23,13 +24,27 @@ export function SessionProvider({
 }: SessionProviderProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(initialAuth);
 
-  const checkSession = () => {
-    // Check if session cookie exists
+  const checkSession = async () => {
+    // Check if session cookie exists first
     const hasSessionCookie = document.cookie
       .split(';')
       .some((cookie) => cookie.trim().startsWith('session_token='));
 
-    setIsAuthenticated(hasSessionCookie);
+    if (!hasSessionCookie) {
+      setIsAuthenticated(false);
+      return;
+    }
+
+    // Validate the session with the backend
+    try {
+      await authService.validateSession();
+      setIsAuthenticated(true);
+    } catch {
+      // Session is invalid or network error, clear it
+      setIsAuthenticated(false);
+      document.cookie =
+        'session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    }
   };
 
   const handleAuthFailure = () => {

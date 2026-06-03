@@ -25,17 +25,17 @@ export default function ResetPasswordForm() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data: PasswordResetRequestData = {
-      newPassword: formData.get('new-password') as string,
+      new_password: formData.get('new-password') as string,
       token: new URLSearchParams(window.location.search).get('token') || '',
     };
     const confirmedPassword = formData.get('confirm-password') as string;
 
-    if (data.newPassword !== confirmedPassword) {
+    if (data.new_password !== confirmedPassword) {
       setError('Passwords must match.');
       setLoading(false);
       return;
     }
-    if (!isValidPassword(data.newPassword)) {
+    if (!isValidPassword(data.new_password)) {
       setError(
         'Password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers.'
       );

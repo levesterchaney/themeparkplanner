@@ -26,4 +26,8 @@ export const authService = {
   resetPassword: async (data: PasswordResetRequestData) => {
     return apiClient.post('/api/v1/auth/reset-password', data);
   },
+
+  validateSession: async () => {
+    return apiClient.get('/api/v1/users/me');
+  },
 };

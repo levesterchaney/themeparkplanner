@@ -25,13 +25,13 @@ export default function NewTripForm() {
   const [destinationOptions, setDestinationOptions] = useState<
     DestinationOption[]
   >([]);
-  const [tripData, setTripData] = useState<NewTripRequestData>({
+  const [tripData, setTripData] = useState({
     title: '',
     destination: '',
-    startDate: new Date(),
-    endDate: new Date(),
-    partySize: 2,
-    hasKids: false,
+    start_date: new Date(),
+    end_date: new Date(),
+    party_size: 2,
+    has_kids: false,
   });
 
   console.log(loading); //TODO remove
@@ -48,11 +48,24 @@ export default function NewTripForm() {
 
   const submitTripData = async () => {
     setLoading(true);
-    if (tripData.endDate < tripData.startDate) {
+    if (tripData.end_date < tripData.start_date) {
       setError('Invalid date range provided.');
+      setLoading(false);
+      return;
     }
+
     try {
-      await tripService.createTrip(tripData);
+      // Format dates as YYYY-MM-DD strings for API
+      const apiData: NewTripRequestData = {
+        title: tripData.title,
+        destination: tripData.destination,
+        start_date: tripData.start_date.toISOString().split('T')[0],
+        end_date: tripData.end_date.toISOString().split('T')[0],
+        party_size: tripData.party_size,
+        has_kids: tripData.has_kids,
+      };
+
+      await tripService.createTrip(apiData);
       router.push('/trips');
     } catch (error: unknown) {
       const errorMessage =
@@ -72,8 +85,8 @@ export default function NewTripForm() {
         const user = await userService.getProfile();
         setTripData((prev) => ({
           ...prev,
-          hasKids: user.preferences?.hasKids || false,
-          partySize: user.preferences?.defaultPartySize || 2,
+          has_kids: user.preferences?.has_kids || false,
+          party_size: user.preferences?.default_party_size || 2,
         }));
       } catch (error) {
         console.error('Failed to fetch user preferences:', error);
@@ -134,28 +147,28 @@ export default function NewTripForm() {
             handleChange={updateTripData}
           />
           <DatePicker
-            id="startDate"
+            id="start_date"
             label="Trip Start Date:"
-            value={tripData.startDate}
+            value={tripData.start_date}
             handleChange={updateTripData}
           />
           <DatePicker
-            id="endDate"
+            id="end_date"
             label="Trip End Date:"
-            value={tripData.endDate}
+            value={tripData.end_date}
             handleChange={updateTripData}
           />
           <Numberbox
-            id="partySize"
+            id="party_size"
             label="Party Size"
-            value={tripData.partySize}
+            value={tripData.party_size}
             handleChange={updateTripData}
           />
           <Checkbox
-            id="hasKids"
+            id="has_kids"
             label="Travelling with Kids?"
-            value={tripData.hasKids}
-            isChecked={tripData.hasKids}
+            value={tripData.has_kids}
+            isChecked={tripData.has_kids}
             handleChange={updateTripData}
           />
           <div className="space-y-4 flex justify-end">
