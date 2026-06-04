@@ -2,6 +2,7 @@
 export { healthService } from './health';
 export { authService } from './auth';
 export { userService } from './user';
+export type { UserProfileResponseData } from './user';
 export { parkService } from './park';
 export { tripService } from './trip';
 
