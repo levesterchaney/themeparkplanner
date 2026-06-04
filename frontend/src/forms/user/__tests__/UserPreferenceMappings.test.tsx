@@ -61,15 +61,15 @@ describe('UserProfileForm - Preference Value Mappings', () => {
     accessibilityMappingTests.forEach(({ frontend, backend, description }) => {
       test(description, async () => {
         const mockUserData = {
-          firstName: 'Test',
-          lastName: 'User',
+          first_name: 'Test',
+          last_name: 'User',
           email: 'test@example.com',
           preferences: {
-            defaultPartySize: 2,
-            hasKids: false,
-            thrillLevel: 'moderate' as const,
-            accessibilityNeeds: [frontend],
-            dietaryRestrictions: [],
+            default_party_size: 2,
+            has_kids: false,
+            thrill_level: 'moderate' as const,
+            accessibility_needs: [frontend],
+            dietary_restrictions: [],
           },
         };
 
@@ -105,22 +105,22 @@ describe('UserProfileForm - Preference Value Mappings', () => {
           const lastCall =
             updatePreferencesCalls[updatePreferencesCalls.length - 1];
           const preferencesData = lastCall[0];
-          expect(preferencesData.accessibilityNeeds).toContain(backend);
+          expect(preferencesData.accessibility_needs).toContain(backend);
         }
       });
     });
 
     test('handles multiple accessibility needs mapping correctly', async () => {
       const mockUserData = {
-        firstName: 'Test',
-        lastName: 'User',
+        first_name: 'Test',
+        last_name: 'User',
         email: 'test@example.com',
         preferences: {
-          defaultPartySize: 2,
-          hasKids: false,
-          thrillLevel: 'moderate' as const,
-          accessibilityNeeds: ['hearing', 'visual', 'wheelchair'],
-          dietaryRestrictions: [],
+          default_party_size: 2,
+          has_kids: false,
+          thrill_level: 'moderate' as const,
+          accessibility_needs: ['hearing', 'visual', 'wheelchair'],
+          dietary_restrictions: [],
         },
       };
 
@@ -151,7 +151,7 @@ describe('UserProfileForm - Preference Value Mappings', () => {
         const lastCall =
           updatePreferencesCalls[updatePreferencesCalls.length - 1];
         const preferencesData = lastCall[0];
-        expect(preferencesData.accessibilityNeeds).toEqual([
+        expect(preferencesData.accessibility_needs).toEqual([
           'hearing_impairment',
           'visual_impairment',
           'wheelchair',
@@ -207,15 +207,15 @@ describe('UserProfileForm - Preference Value Mappings', () => {
     dietaryMappingTests.forEach(({ frontend, backend, description }) => {
       test(description, async () => {
         const mockUserData = {
-          firstName: 'Test',
-          lastName: 'User',
+          first_name: 'Test',
+          last_name: 'User',
           email: 'test@example.com',
           preferences: {
-            defaultPartySize: 2,
-            hasKids: false,
-            thrillLevel: 'moderate' as const,
-            accessibilityNeeds: [],
-            dietaryRestrictions: [frontend],
+            default_party_size: 2,
+            has_kids: false,
+            thrill_level: 'moderate' as const,
+            accessibility_needs: [],
+            dietary_restrictions: [frontend],
           },
         };
 
@@ -246,22 +246,22 @@ describe('UserProfileForm - Preference Value Mappings', () => {
           const lastCall =
             updatePreferencesCalls[updatePreferencesCalls.length - 1];
           const preferencesData = lastCall[0];
-          expect(preferencesData.dietaryRestrictions).toContain(backend);
+          expect(preferencesData.dietary_restrictions).toContain(backend);
         }
       });
     });
 
     test('handles multiple dietary restrictions mapping correctly', async () => {
       const mockUserData = {
-        firstName: 'Test',
-        lastName: 'User',
+        first_name: 'Test',
+        last_name: 'User',
         email: 'test@example.com',
         preferences: {
-          defaultPartySize: 2,
-          hasKids: false,
-          thrillLevel: 'moderate' as const,
-          accessibilityNeeds: [],
-          dietaryRestrictions: ['glutenFree', 'dairyFree', 'vegetarian'],
+          default_party_size: 2,
+          has_kids: false,
+          thrill_level: 'moderate' as const,
+          accessibility_needs: [],
+          dietary_restrictions: ['glutenFree', 'dairyFree', 'vegetarian'],
         },
       };
 
@@ -292,7 +292,7 @@ describe('UserProfileForm - Preference Value Mappings', () => {
         const lastCall =
           updatePreferencesCalls[updatePreferencesCalls.length - 1];
         const preferencesData = lastCall[0];
-        expect(preferencesData.dietaryRestrictions).toEqual([
+        expect(preferencesData.dietary_restrictions).toEqual([
           'gluten_free',
           'dairy_free',
           'vegetarian',
@@ -304,19 +304,19 @@ describe('UserProfileForm - Preference Value Mappings', () => {
   describe('Backend to Frontend Mapping (Display)', () => {
     test('correctly maps backend accessibility values for display', async () => {
       const mockUserDataFromBackend = {
-        firstName: 'Test',
-        lastName: 'User',
+        first_name: 'Test',
+        last_name: 'User',
         email: 'test@example.com',
         preferences: {
-          defaultPartySize: 2,
-          hasKids: false,
-          thrillLevel: 'moderate' as const,
-          accessibilityNeeds: [
+          default_party_size: 2,
+          has_kids: false,
+          thrill_level: 'moderate' as const,
+          accessibility_needs: [
             'hearing_impairment',
             'visual_impairment',
             'service_animal',
           ],
-          dietaryRestrictions: [],
+          dietary_restrictions: [],
         },
       };
 
@@ -342,15 +342,15 @@ describe('UserProfileForm - Preference Value Mappings', () => {
 
     test('correctly maps backend dietary values for display', async () => {
       const mockUserDataFromBackend = {
-        firstName: 'Test',
-        lastName: 'User',
+        first_name: 'Test',
+        last_name: 'User',
         email: 'test@example.com',
         preferences: {
-          defaultPartySize: 2,
-          hasKids: false,
-          thrillLevel: 'moderate' as const,
-          accessibilityNeeds: [],
-          dietaryRestrictions: ['gluten_free', 'dairy_free', 'nut_allergy'],
+          default_party_size: 2,
+          has_kids: false,
+          thrill_level: 'moderate' as const,
+          accessibility_needs: [],
+          dietary_restrictions: ['gluten_free', 'dairy_free', 'nut_allergy'],
         },
       };
 
@@ -378,15 +378,15 @@ describe('UserProfileForm - Preference Value Mappings', () => {
   describe('Edge Cases', () => {
     test('handles unknown accessibility values gracefully', async () => {
       const mockUserData = {
-        firstName: 'Test',
-        lastName: 'User',
+        first_name: 'Test',
+        last_name: 'User',
         email: 'test@example.com',
         preferences: {
-          defaultPartySize: 2,
-          hasKids: false,
-          thrillLevel: 'moderate' as const,
-          accessibilityNeeds: ['unknown_value', 'wheelchair'],
-          dietaryRestrictions: [],
+          default_party_size: 2,
+          has_kids: false,
+          thrill_level: 'moderate' as const,
+          accessibility_needs: ['unknown_value', 'wheelchair'],
+          dietary_restrictions: [],
         },
       };
 
@@ -418,7 +418,7 @@ describe('UserProfileForm - Preference Value Mappings', () => {
         const lastCall =
           updatePreferencesCalls[updatePreferencesCalls.length - 1];
         const preferencesData = lastCall[0];
-        expect(preferencesData.accessibilityNeeds).toEqual([
+        expect(preferencesData.accessibility_needs).toEqual([
           'unknown_value',
           'wheelchair',
         ]);
@@ -427,15 +427,15 @@ describe('UserProfileForm - Preference Value Mappings', () => {
 
     test('handles unknown dietary values gracefully', async () => {
       const mockUserData = {
-        firstName: 'Test',
-        lastName: 'User',
+        first_name: 'Test',
+        last_name: 'User',
         email: 'test@example.com',
         preferences: {
-          defaultPartySize: 2,
-          hasKids: false,
-          thrillLevel: 'moderate' as const,
-          accessibilityNeeds: [],
-          dietaryRestrictions: ['unknown_diet', 'vegetarian'],
+          default_party_size: 2,
+          has_kids: false,
+          thrill_level: 'moderate' as const,
+          accessibility_needs: [],
+          dietary_restrictions: ['unknown_diet', 'vegetarian'],
         },
       };
 
@@ -467,7 +467,7 @@ describe('UserProfileForm - Preference Value Mappings', () => {
         const lastCall =
           updatePreferencesCalls[updatePreferencesCalls.length - 1];
         const preferencesData = lastCall[0];
-        expect(preferencesData.dietaryRestrictions).toEqual([
+        expect(preferencesData.dietary_restrictions).toEqual([
           'unknown_diet',
           'vegetarian',
         ]);
@@ -476,15 +476,15 @@ describe('UserProfileForm - Preference Value Mappings', () => {
 
     test('handles empty arrays correctly', async () => {
       const mockUserData = {
-        firstName: 'Test',
-        lastName: 'User',
+        first_name: 'Test',
+        last_name: 'User',
         email: 'test@example.com',
         preferences: {
-          defaultPartySize: 2,
-          hasKids: false,
-          thrillLevel: 'moderate' as const,
-          accessibilityNeeds: [],
-          dietaryRestrictions: [],
+          default_party_size: 2,
+          has_kids: false,
+          thrill_level: 'moderate' as const,
+          accessibility_needs: [],
+          dietary_restrictions: [],
         },
       };
 
@@ -515,8 +515,8 @@ describe('UserProfileForm - Preference Value Mappings', () => {
         const lastCall =
           updatePreferencesCalls[updatePreferencesCalls.length - 1];
         const preferencesData = lastCall[0];
-        expect(preferencesData.accessibilityNeeds).toEqual([]);
-        expect(preferencesData.dietaryRestrictions).toEqual([]);
+        expect(preferencesData.accessibility_needs).toEqual([]);
+        expect(preferencesData.dietary_restrictions).toEqual([]);
       }
     });
   });

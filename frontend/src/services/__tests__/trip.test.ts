@@ -19,10 +19,10 @@ describe('tripService', () => {
       const tripData: NewTripRequestData = {
         title: 'Disney Adventure',
         destination: 'Walt Disney World Resort',
-        startDate: new Date('2024-06-01'),
-        endDate: new Date('2024-06-05'),
-        partySize: 4,
-        hasKids: true,
+        start_date: '2024-06-01',
+        end_date: '2024-06-05',
+        party_size: 4,
+        has_kids: true,
       };
 
       const expectedResponse = { message: 'Trip created successfully' };
@@ -38,10 +38,10 @@ describe('tripService', () => {
       const tripData: NewTripRequestData = {
         title: 'Disney Adventure',
         destination: 'Walt Disney World Resort',
-        startDate: new Date('2024-06-01'),
-        endDate: new Date('2024-06-05'),
-        partySize: 4,
-        hasKids: true,
+        start_date: '2024-06-01',
+        end_date: '2024-06-05',
+        party_size: 4,
+        has_kids: true,
       };
 
       const apiError = new Error('Network error');
@@ -57,10 +57,10 @@ describe('tripService', () => {
       const tripData: NewTripRequestData = {
         title: 'Universal Adventure',
         destination: 'Universal Orlando Resort',
-        startDate: new Date('2024-07-01'),
-        endDate: new Date('2024-07-03'),
-        partySize: 2,
-        hasKids: false,
+        start_date: '2024-07-01',
+        end_date: '2024-07-03',
+        party_size: 2,
+        has_kids: false,
       };
 
       (apiClient.post as jest.Mock).mockResolvedValue({ message: 'Success' });
@@ -79,8 +79,8 @@ describe('tripService', () => {
           id: 1,
           title: 'Disney Adventure',
           destination: 'Walt Disney World Resort',
-          start_date: '2026-06-01',
-          end_date: '2026-06-05',
+          start_date: '2026-07-01',
+          end_date: '2026-07-05',
           party_size: 4,
           has_kids: true,
           status: 'planned',
@@ -89,8 +89,8 @@ describe('tripService', () => {
           id: 2,
           title: 'Universal Fun',
           destination: 'Universal Orlando Resort',
-          start_date: '2026-07-01',
-          end_date: '2026-07-03',
+          start_date: '2026-08-01',
+          end_date: '2026-08-03',
           party_size: 2,
           has_kids: false,
           status: 'draft',
@@ -248,10 +248,10 @@ describe('tripService', () => {
       const tripData: NewTripRequestData = {
         title: 'Integration Test',
         destination: 'Test Resort',
-        startDate: new Date('2024-12-01'),
-        endDate: new Date('2024-12-05'),
-        partySize: 3,
-        hasKids: true,
+        start_date: '2024-12-01',
+        end_date: '2024-12-05',
+        party_size: 3,
+        has_kids: true,
       };
 
       (apiClient.post as jest.Mock).mockResolvedValue({ message: 'Success' });
@@ -272,10 +272,10 @@ describe('tripService', () => {
       const tripData: NewTripRequestData = {
         title: 'Count Test',
         destination: 'Test Resort',
-        startDate: new Date('2024-12-01'),
-        endDate: new Date('2024-12-05'),
-        partySize: 1,
-        hasKids: false,
+        start_date: '2024-12-01',
+        end_date: '2024-12-05',
+        party_size: 1,
+        has_kids: false,
       };
 
       (apiClient.post as jest.Mock).mockResolvedValue({ message: 'Success' });

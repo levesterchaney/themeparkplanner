@@ -181,8 +181,8 @@ describe('RegistrationForm Component', () => {
 
     await waitFor(() => {
       expect(mockAuthService.register).toHaveBeenCalledWith({
-        firstName: 'John',
-        lastName: 'Doe',
+        first_name: 'John',
+        last_name: 'Doe',
         email: 'john@example.com',
         password: 'StrongPassword123',
       });
@@ -213,8 +213,8 @@ describe('RegistrationForm Component', () => {
 
     await waitFor(() => {
       expect(mockAuthService.register).toHaveBeenCalledWith({
-        firstName: 'John',
-        lastName: undefined,
+        first_name: 'John',
+        last_name: undefined,
         email: 'john@example.com',
         password: 'StrongPassword123',
       });

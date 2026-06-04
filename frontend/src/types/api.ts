@@ -22,8 +22,8 @@ export interface HealthStatus {
 export interface RegistrationRequestData {
   email: string;
   password: string;
-  firstName?: string;
-  lastName?: string;
+  first_name?: string;
+  last_name?: string;
 }
 
 export interface LoginRequestData {
@@ -37,28 +37,28 @@ export interface ForgotPasswordRequestData {
 
 export interface PasswordResetRequestData {
   token: string;
-  newPassword: string;
+  new_password: string;
 }
 
 export interface UserProfileRequestData {
-  firstName: string;
-  lastName: string;
-  avatarUrl: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string;
 }
 
 export interface UserPreferenceRequestData {
-  defaultPartySize?: number;
-  hasKids?: boolean;
-  thrillLevel?: string;
-  accessibilityNeeds?: string[];
-  dietaryRestrictions?: string[];
+  default_party_size?: number;
+  has_kids?: boolean;
+  thrill_level?: string;
+  accessibility_needs?: string[];
+  dietary_restrictions?: string[];
 }
 
 export interface NewTripRequestData {
   title: string;
   destination: string;
-  startDate: Date;
-  endDate: Date;
-  partySize: number;
-  hasKids: boolean;
+  start_date: string; // Changed to string to match backend date format
+  end_date: string; // Changed to string to match backend date format
+  party_size: number;
+  has_kids: boolean;
 }

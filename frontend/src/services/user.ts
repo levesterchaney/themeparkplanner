@@ -3,16 +3,16 @@ import { UserProfileRequestData, UserPreferenceRequestData } from '@/types/api';
 
 // Response types for user profile data
 export interface UserProfileResponseData {
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
   avatar?: string;
   preferences?: {
-    defaultPartySize?: number;
-    hasKids?: boolean;
-    thrillLevel?: 'low' | 'moderate' | 'high' | 'extreme';
-    accessibilityNeeds?: string[];
-    dietaryRestrictions?: string[];
+    default_party_size?: number;
+    has_kids?: boolean;
+    thrill_level?: 'low' | 'moderate' | 'high' | 'extreme';
+    accessibility_needs?: string[];
+    dietary_restrictions?: string[];
   };
 }
 

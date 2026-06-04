@@ -20,16 +20,16 @@ describe('userService', () => {
   describe('getProfile', () => {
     test('successfully fetches user profile', async () => {
       const mockUserProfile = {
-        firstName: 'John',
-        lastName: 'Doe',
+        first_name: 'John',
+        last_name: 'Doe',
         email: 'john.doe@example.com',
         avatar: 'https://example.com/avatar.jpg',
         preferences: {
-          defaultPartySize: 4,
-          hasKids: true,
-          thrillLevel: 'high' as const,
-          accessibilityNeeds: ['wheelchair'],
-          dietaryRestrictions: ['vegetarian'],
+          default_party_size: 4,
+          has_kids: true,
+          thrill_level: 'high' as const,
+          accessibility_needs: ['wheelchair'],
+          dietary_restrictions: ['vegetarian'],
         },
       };
 
@@ -51,8 +51,8 @@ describe('userService', () => {
 
     test('returns user profile without preferences', async () => {
       const mockUserProfile = {
-        firstName: 'Jane',
-        lastName: 'Smith',
+        first_name: 'Jane',
+        last_name: 'Smith',
         email: 'jane.smith@example.com',
       };
 
@@ -74,8 +74,8 @@ describe('userService', () => {
   describe('updateProfile', () => {
     test('successfully updates user profile with all fields', async () => {
       const profileData: UserProfileRequestData = {
-        firstName: 'John',
-        lastName: 'Doe',
+        first_name: 'John',
+        last_name: 'Doe',
         avatarUrl: 'https://example.com/new-avatar.jpg',
       };
 
@@ -93,7 +93,7 @@ describe('userService', () => {
 
     test('successfully updates profile with partial data', async () => {
       const profileData: UserProfileRequestData = {
-        firstName: 'Jane',
+        first_name: 'Jane',
       };
 
       const mockResponse = { message: 'Profile updated' };
@@ -110,8 +110,8 @@ describe('userService', () => {
 
     test('handles update profile API error', async () => {
       const profileData: UserProfileRequestData = {
-        firstName: 'John',
-        lastName: 'Doe',
+        first_name: 'John',
+        last_name: 'Doe',
       };
 
       mockApiClient.patch.mockRejectedValue(new Error('Update failed'));
@@ -127,23 +127,23 @@ describe('userService', () => {
 
     test('handles validation errors', async () => {
       const profileData: UserProfileRequestData = {
-        firstName: '',
-        lastName: 'Doe',
+        first_name: '',
+        last_name: 'Doe',
       };
 
       mockApiClient.patch.mockRejectedValue(
-        new Error('Validation failed: firstName is required')
+        new Error('Validation failed: first_name is required')
       );
 
       await expect(userService.updateProfile(profileData)).rejects.toThrow(
-        'Validation failed: firstName is required'
+        'Validation failed: first_name is required'
       );
     });
 
     test('updates profile with empty avatar URL', async () => {
       const profileData: UserProfileRequestData = {
-        firstName: 'John',
-        lastName: 'Doe',
+        first_name: 'John',
+        last_name: 'Doe',
         avatarUrl: '',
       };
 
@@ -163,11 +163,11 @@ describe('userService', () => {
   describe('updateUserPreferences', () => {
     test('successfully updates all preference fields', async () => {
       const preferencesData: UserPreferenceRequestData = {
-        defaultPartySize: 6,
-        hasKids: true,
-        thrillLevel: 'extreme',
-        accessibilityNeeds: ['wheelchair', 'hearing_impairment'],
-        dietaryRestrictions: ['gluten_free', 'dairy_free'],
+        default_party_size: 6,
+        has_kids: true,
+        thrill_level: 'extreme',
+        accessibility_needs: ['wheelchair', 'hearing_impairment'],
+        dietary_restrictions: ['gluten_free', 'dairy_free'],
       };
 
       const mockResponse = { message: 'Preferences updated successfully' };
@@ -184,8 +184,8 @@ describe('userService', () => {
 
     test('updates partial preferences', async () => {
       const preferencesData: UserPreferenceRequestData = {
-        thrillLevel: 'low',
-        hasKids: false,
+        thrill_level: 'low',
+        has_kids: false,
       };
 
       const mockResponse = { message: 'Preferences updated' };
@@ -202,7 +202,7 @@ describe('userService', () => {
 
     test('updates only party size preference', async () => {
       const preferencesData: UserPreferenceRequestData = {
-        defaultPartySize: 2,
+        default_party_size: 2,
       };
 
       const mockResponse = { message: 'Party size updated' };
@@ -215,7 +215,7 @@ describe('userService', () => {
 
     test('updates only accessibility needs', async () => {
       const preferencesData: UserPreferenceRequestData = {
-        accessibilityNeeds: ['visual_impairment'],
+        accessibility_needs: ['visual_impairment'],
       };
 
       const mockResponse = { message: 'Accessibility preferences updated' };
@@ -228,7 +228,7 @@ describe('userService', () => {
 
     test('updates only dietary restrictions', async () => {
       const preferencesData: UserPreferenceRequestData = {
-        dietaryRestrictions: ['vegetarian', 'nut_allergy'],
+        dietary_restrictions: ['vegetarian', 'nut_allergy'],
       };
 
       const mockResponse = { message: 'Dietary preferences updated' };
@@ -241,7 +241,7 @@ describe('userService', () => {
 
     test('handles preference update API error', async () => {
       const preferencesData: UserPreferenceRequestData = {
-        defaultPartySize: -1, // Invalid value
+        default_party_size: -1, // Invalid value
       };
 
       mockApiClient.patch.mockRejectedValue(new Error('Invalid party size'));
@@ -257,7 +257,7 @@ describe('userService', () => {
 
     test('handles network error during preferences update', async () => {
       const preferencesData: UserPreferenceRequestData = {
-        thrillLevel: 'high',
+        thrill_level: 'high',
       };
 
       mockApiClient.patch.mockRejectedValue(new Error('Network timeout'));
@@ -269,7 +269,7 @@ describe('userService', () => {
 
     test('handles server error response', async () => {
       const preferencesData: UserPreferenceRequestData = {
-        defaultPartySize: 4,
+        default_party_size: 4,
       };
 
       mockApiClient.patch.mockRejectedValue(new Error('Internal server error'));
@@ -281,8 +281,8 @@ describe('userService', () => {
 
     test('updates with empty arrays', async () => {
       const preferencesData: UserPreferenceRequestData = {
-        accessibilityNeeds: [],
-        dietaryRestrictions: [],
+        accessibility_needs: [],
+        dietary_restrictions: [],
       };
 
       const mockResponse = { message: 'Preferences cleared' };
@@ -305,12 +305,12 @@ describe('userService', () => {
         'extreme',
       ];
 
-      for (const thrillLevel of validThrillLevels) {
+      for (const thrill_level of validThrillLevels) {
         const preferencesData: UserPreferenceRequestData = {
-          thrillLevel,
+          thrill_level,
         };
 
-        const mockResponse = { message: `Thrill level set to ${thrillLevel}` };
+        const mockResponse = { message: `Thrill level set to ${thrill_level}` };
         mockApiClient.patch.mockResolvedValue(mockResponse);
 
         const result = await userService.updateUserPreferences(preferencesData);
@@ -337,7 +337,7 @@ describe('userService', () => {
       mockApiClient.patch.mockRejectedValue(forbiddenError);
 
       await expect(
-        userService.updateProfile({ firstName: 'Test' })
+        userService.updateProfile({ first_name: 'Test' })
       ).rejects.toThrow('Forbidden');
     });
 
@@ -353,7 +353,7 @@ describe('userService', () => {
       mockApiClient.patch.mockRejectedValue(serverError);
 
       await expect(
-        userService.updateUserPreferences({ defaultPartySize: 2 })
+        userService.updateUserPreferences({ default_party_size: 2 })
       ).rejects.toThrow('Internal server error');
     });
   });
@@ -361,12 +361,12 @@ describe('userService', () => {
   describe('data flow integration', () => {
     test('profile update followed by preferences update', async () => {
       const profileData: UserProfileRequestData = {
-        firstName: 'John',
-        lastName: 'Doe',
+        first_name: 'John',
+        last_name: 'Doe',
       };
       const preferencesData: UserPreferenceRequestData = {
-        defaultPartySize: 4,
-        hasKids: true,
+        default_party_size: 4,
+        has_kids: true,
       };
 
       const profileResponse = { message: 'Profile updated' };
@@ -387,13 +387,13 @@ describe('userService', () => {
 
     test('get profile after update operations', async () => {
       const updatedProfile = {
-        firstName: 'Updated',
-        lastName: 'User',
+        first_name: 'Updated',
+        last_name: 'User',
         email: 'updated@example.com',
         preferences: {
-          defaultPartySize: 3,
-          hasKids: false,
-          thrillLevel: 'moderate' as const,
+          default_party_size: 3,
+          has_kids: false,
+          thrill_level: 'moderate' as const,
         },
       };
 
@@ -404,15 +404,15 @@ describe('userService', () => {
       mockApiClient.get.mockResolvedValueOnce(updatedProfile);
 
       await userService.updateProfile({
-        firstName: 'Updated',
-        lastName: 'User',
+        first_name: 'Updated',
+        last_name: 'User',
       });
       const result = await userService.getProfile();
 
       expect(result).toEqual(updatedProfile);
       expect(mockApiClient.patch).toHaveBeenCalledWith('/api/v1/users/me', {
-        firstName: 'Updated',
-        lastName: 'User',
+        first_name: 'Updated',
+        last_name: 'User',
       });
       expect(mockApiClient.get).toHaveBeenCalledWith('/api/v1/users/me');
     });
