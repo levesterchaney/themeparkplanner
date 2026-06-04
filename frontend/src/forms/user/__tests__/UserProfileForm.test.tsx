@@ -19,22 +19,22 @@ const mockUserService = userService as jest.Mocked<typeof userService>;
 
 // Mock user data
 const mockUserData = {
-  firstName: 'John',
-  lastName: 'Doe',
+  first_name: 'John',
+  last_name: 'Doe',
   email: 'john.doe@example.com',
   avatar: 'https://example.com/avatar.jpg',
   preferences: {
-    defaultPartySize: 2,
-    hasKids: false,
-    thrillLevel: 'moderate' as const,
-    accessibilityNeeds: ['wheelchair'],
-    dietaryRestrictions: ['vegetarian'],
+    default_party_size: 2,
+    has_kids: false,
+    thrill_level: 'moderate' as const,
+    accessibility_needs: ['wheelchair'],
+    dietary_restrictions: ['vegetarian'],
   },
 };
 
 const mockUserDataWithoutPreferences = {
-  firstName: 'Jane',
-  lastName: 'Smith',
+  first_name: 'Jane',
+  last_name: 'Smith',
   email: 'jane.smith@example.com',
   avatar: null,
   preferences: undefined,
@@ -43,6 +43,8 @@ const mockUserDataWithoutPreferences = {
 describe('UserProfileForm - Preferences Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock window.alert
+    window.alert = jest.fn();
   });
 
   describe('Loading and Initial State', () => {
@@ -232,9 +234,9 @@ describe('UserProfileForm - Preferences Tests', () => {
 
       await waitFor(() => {
         expect(mockUserService.updateProfile).toHaveBeenCalledWith({
-          firstName: 'Johnny',
-          lastName: 'Doe',
-          avatarUrl: 'https://example.com/avatar.jpg',
+          first_name: 'Johnny',
+          last_name: 'Doe',
+          avatar_url: 'https://example.com/avatar.jpg',
         });
       });
 
@@ -251,11 +253,11 @@ describe('UserProfileForm - Preferences Tests', () => {
 
       await waitFor(() => {
         expect(mockUserService.updateUserPreferences).toHaveBeenCalledWith({
-          defaultPartySize: 4,
-          hasKids: false,
-          thrillLevel: 'moderate',
-          accessibilityNeeds: ['wheelchair'],
-          dietaryRestrictions: ['vegetarian'],
+          default_party_size: 4,
+          has_kids: false,
+          thrill_level: 'moderate',
+          accessibility_needs: ['wheelchair'],
+          dietary_restrictions: ['vegetarian'],
         });
       });
     });
@@ -333,9 +335,9 @@ describe('UserProfileForm - Preferences Tests', () => {
       const partialUserData = {
         ...mockUserData,
         preferences: {
-          defaultPartySize: 3,
-          hasKids: true,
-          // Missing thrillLevel, accessibilityNeeds, dietaryRestrictions
+          default_party_size: 3,
+          has_kids: true,
+          // Missing thrill_level, accessibility_needs, dietary_restrictions
         },
       };
 
@@ -361,8 +363,8 @@ describe('UserProfileForm - Preferences Tests', () => {
 
       await waitFor(() => {
         expect(mockUserService.updateUserPreferences).toHaveBeenCalledWith({
-          defaultPartySize: 3,
-          hasKids: true,
+          default_party_size: 3,
+          has_kids: true,
           // Should not include undefined fields
         });
       });
@@ -376,7 +378,7 @@ describe('UserProfileForm - Preferences Tests', () => {
         ...mockUserData,
         preferences: {
           ...mockUserData.preferences,
-          accessibilityNeeds: ['hearing_impairment', 'visual_impairment'], // Backend format
+          accessibility_needs: ['hearing_impairment', 'visual_impairment'], // Backend format
         },
       };
 
@@ -402,7 +404,7 @@ describe('UserProfileForm - Preferences Tests', () => {
       await waitFor(() => {
         expect(mockUserService.updateUserPreferences).toHaveBeenCalledWith(
           expect.objectContaining({
-            accessibilityNeeds: ['hearing_impairment', 'visual_impairment'], // Should map to backend format
+            accessibility_needs: ['hearing_impairment', 'visual_impairment'], // Should map to backend format
           })
         );
       });
@@ -414,7 +416,7 @@ describe('UserProfileForm - Preferences Tests', () => {
         ...mockUserData,
         preferences: {
           ...mockUserData.preferences,
-          dietaryRestrictions: ['gluten_free', 'dairy_free'], // Backend format
+          dietary_restrictions: ['gluten_free', 'dairy_free'], // Backend format
         },
       };
 
@@ -440,7 +442,7 @@ describe('UserProfileForm - Preferences Tests', () => {
       await waitFor(() => {
         expect(mockUserService.updateUserPreferences).toHaveBeenCalledWith(
           expect.objectContaining({
-            dietaryRestrictions: ['gluten_free', 'dairy_free'], // Should map to backend format
+            dietary_restrictions: ['gluten_free', 'dairy_free'], // Should map to backend format
           })
         );
       });

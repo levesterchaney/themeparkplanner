@@ -147,7 +147,7 @@ export default function UserProfileForm() {
       await userService.updateProfile({
         first_name: user.first_name,
         last_name: user.last_name,
-        avatarUrl: user.avatar || '',
+        avatar_url: user.avatar || '',
       });
 
       // Refresh user data

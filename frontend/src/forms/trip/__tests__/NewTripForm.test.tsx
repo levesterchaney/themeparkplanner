@@ -27,8 +27,8 @@ const mockRouter = {
 
 const mockUserProfile = {
   preferences: {
-    hasKids: false,
-    defaultPartySize: 2,
+    has_kids: false,
+    default_party_size: 2,
   },
 };
 
@@ -134,10 +134,10 @@ describe('NewTripForm Component', () => {
       expect(tripService.createTrip).toHaveBeenCalledWith({
         title: 'My Disney Trip',
         destination: '',
-        startDate: expect.any(Date),
-        endDate: expect.any(Date),
-        partySize: 2,
-        hasKids: false,
+        start_date: expect.any(String),
+        end_date: expect.any(String),
+        party_size: 2,
+        has_kids: false,
       });
     });
 
