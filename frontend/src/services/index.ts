@@ -5,6 +5,8 @@ export { userService } from './user';
 export type { UserProfileResponseData } from './user';
 export { parkService } from './park';
 export { tripService } from './trip';
+export type { TripDetailResponseData } from './trip';
+export { itineraryService } from './itinerary';
 
 // Future service exports will go here:
 // export { parksService } from './parks';

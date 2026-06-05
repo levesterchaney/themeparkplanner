@@ -4,6 +4,7 @@ interface TextboxProps {
   id: string;
   label: string;
   value?: string;
+  placeholder?: string;
   isRequired?: boolean;
   isDisabled?: boolean;
   handleChange: (id: string, value: string) => void;
@@ -13,6 +14,7 @@ export default function Textbox({
   id,
   label,
   value = '',
+  placeholder,
   isRequired = false,
   isDisabled = false,
   handleChange = () => {},
@@ -26,6 +28,7 @@ export default function Textbox({
         name={id}
         type="text"
         value={value}
+        placeholder={placeholder}
         onChange={(e) => handleChange(id, e.target.value)}
         required={isRequired}
         disabled={isDisabled}

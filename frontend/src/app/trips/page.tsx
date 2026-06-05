@@ -18,44 +18,80 @@ export default function MyTripsSummaryPage() {
   console.log(upcomingTripList); //TODO remove
   console.log(pastTripList); //TODO remove
 
+  const openTripCreation = () => {
+    router.push('/trips/new');
+  };
+
+  const formatDateRange = (startDate: string, endDate: string) => {
+    const start = new Date(startDate).toLocaleDateString();
+    const end = new Date(endDate).toLocaleDateString();
+    return `${start} - ${end}`;
+  };
+
   const content = [
     {
       id: 'upcoming-trips',
       label: `Upcoming (${upcomingTripList.length})`,
       content: (
-        <TripCard
-          title={upcomingTripList[0] ? upcomingTripList[0].title : ''}
-          destination={
-            upcomingTripList[0] ? upcomingTripList[0].destination : ''
-          }
-          dateRange={
-            upcomingTripList[0]
-              ? `${upcomingTripList[0].start_date} - ${upcomingTripList[0].end_date}`
-              : ''
-          }
-        />
+        <div className="space-y-4">
+          {upcomingTripList.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>No upcoming trips planned.</p>
+              <Button onClick={openTripCreation} className="mt-4">
+                Create Your First Trip
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingTripList.map((trip) => (
+                <TripCard
+                  key={trip.id}
+                  id={trip.id}
+                  title={trip.title}
+                  destination={trip.destination}
+                  dateRange={formatDateRange(trip.start_date, trip.end_date)}
+                  status={trip.status}
+                  partySize={trip.party_size}
+                  hasKids={trip.has_kids}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       ),
     },
     {
       id: 'past-trips',
       label: `Past (${pastTripList.length})`,
       content: (
-        <TripCard
-          title={pastTripList[0] ? pastTripList[0].title : ''}
-          destination={pastTripList[0] ? pastTripList[0].destination : ''}
-          dateRange={
-            pastTripList[0]
-              ? `${pastTripList[0].start_date} - ${pastTripList[0].end_date}`
-              : ''
-          }
-        />
+        <div className="space-y-4">
+          {pastTripList.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>No past trips to show.</p>
+              <p className="text-sm mt-1">
+                Your completed trips will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pastTripList.map((trip) => (
+                <TripCard
+                  key={trip.id}
+                  id={trip.id}
+                  title={trip.title}
+                  destination={trip.destination}
+                  dateRange={formatDateRange(trip.start_date, trip.end_date)}
+                  status={trip.status}
+                  partySize={trip.party_size}
+                  hasKids={trip.has_kids}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       ),
     },
   ];
-
-  const openTripCreation = () => {
-    router.push('/trips/new');
-  };
 
   useEffect(() => {
     const fetchUserTripData = async () => {

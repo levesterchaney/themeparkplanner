@@ -41,7 +41,7 @@ export const parkService = {
       `/api/v1/parks/${parkId}`
     );
   },
-  getParkAttractions: async (parkId: string) => {
+  getParkAttractions: async (parkId: number | string) => {
     return await apiClient.get<AttractionDetailResponseData[]>(
       `/api/v1/parks/${parkId}/attractions`
     );
