@@ -11,7 +11,10 @@ import {
 } from '@/components';
 import { ItineraryPreferencesData } from '@/types/api';
 import { parkService, TripDetailResponseData } from '@/services';
-import { AttractionDetailResponseData } from '@/services/park';
+import {
+  AttractionDetailResponseData,
+  ParkDetailResponseData,
+} from '@/services/park';
 
 interface ItineraryPreferencesWizardProps {
   trip: TripDetailResponseData;
@@ -30,6 +33,7 @@ export default function ItineraryPreferencesWizard({
   const [attractions, setAttractions] = useState<
     AttractionDetailResponseData[]
   >([]);
+  const [parks, setParks] = useState<ParkDetailResponseData[]>([]);
   const [loadingAttractions, setLoadingAttractions] = useState(false);
 
   // Form state
@@ -69,6 +73,9 @@ export default function ItineraryPreferencesWizard({
         const destinationParks = parkList.filter(
           (park) => park.resort_name === trip.destination
         );
+
+        // Set parks state
+        setParks(destinationParks);
 
         // Load attractions for each park
         const allAttractions: AttractionDetailResponseData[] = [];
@@ -432,6 +439,7 @@ export default function ItineraryPreferencesWizard({
                 }
                 mode="must-do"
                 maxSelections={10}
+                parks={parks}
               />
 
               <AttractionSelector
@@ -441,6 +449,7 @@ export default function ItineraryPreferencesWizard({
                   updatePreferences({ skip_attractions: ids })
                 }
                 mode="skip"
+                parks={parks}
               />
             </>
           )}
@@ -709,7 +718,7 @@ export default function ItineraryPreferencesWizard({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full h-[90vh] flex flex-col">
         <Wizard
           steps={steps}
           currentStep={currentStep}

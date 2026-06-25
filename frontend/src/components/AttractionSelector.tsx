@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { AttractionDetailResponseData } from '@/services/park';
+import {
+  AttractionDetailResponseData,
+  ParkDetailResponseData,
+} from '@/services/park';
 import { Button, Textbox } from '@/components';
 
 interface AttractionSelectorProps {
@@ -11,6 +14,7 @@ interface AttractionSelectorProps {
   mode: 'must-do' | 'skip';
   maxSelections?: number;
   className?: string;
+  parks?: ParkDetailResponseData[];
 }
 
 export default function AttractionSelector({
@@ -20,6 +24,7 @@ export default function AttractionSelector({
   mode,
   maxSelections,
   className = '',
+  parks = [],
 }: AttractionSelectorProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
@@ -85,23 +90,27 @@ export default function AttractionSelector({
 
   // Group attractions by park if multiple parks
   const attractionsByPark = useMemo(() => {
-    const parks = new Map<
+    const parkMap = new Map<
       number,
       { name: string; attractions: AttractionDetailResponseData[] }
     >();
 
     filteredAttractions.forEach((attraction) => {
-      if (!parks.has(attraction.park_id)) {
-        parks.set(attraction.park_id, {
-          name: `Park ${attraction.park_id}`, // We'll need to get actual park names
+      if (!parkMap.has(attraction.park_id)) {
+        // Find the park name from the parks prop, fallback to Park {id}
+        const park = parks.find((p) => p.id === attraction.park_id);
+        const parkName = park?.name || `Park ${attraction.park_id}`;
+
+        parkMap.set(attraction.park_id, {
+          name: parkName,
           attractions: [],
         });
       }
-      parks.get(attraction.park_id)!.attractions.push(attraction);
+      parkMap.get(attraction.park_id)!.attractions.push(attraction);
     });
 
-    return parks;
-  }, [filteredAttractions]);
+    return parkMap;
+  }, [filteredAttractions, parks]);
 
   const handleAttractionToggle = (attractionId: string) => {
     const isSelected = selectedAttractions.includes(attractionId);

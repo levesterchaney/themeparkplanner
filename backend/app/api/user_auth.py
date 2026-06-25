@@ -114,7 +114,7 @@ async def register_user(
             value=user_session.token,
             httponly=True,
             samesite="lax",
-            secure=True,
+            secure=settings.environment == "production",
         )
         await db.commit()
     except Exception as e:
@@ -164,7 +164,7 @@ async def login_user(
             value=user_session.token,
             httponly=True,
             samesite="lax",
-            secure=True,
+            secure=settings.environment == "production",
         )
         await db.commit()
     except Exception as e:

@@ -61,10 +61,10 @@ export default function Wizard({
 
   return (
     <div
-      className={`bg-white rounded-lg shadow-lg overflow-hidden ${className}`}
+      className={`bg-white rounded-lg shadow-lg flex flex-col h-full ${className}`}
     >
       {/* Step Progress Indicator */}
-      <div className="px-6 py-4 border-b border-gray-200">
+      <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
         <div className="flex items-center space-x-4">
           {steps.map((step, index) => (
             <div
@@ -135,7 +135,7 @@ export default function Wizard({
       </div>
 
       {/* Step Content */}
-      <div className="px-6 py-8">
+      <div className="px-6 py-8 overflow-y-auto flex-1 min-h-0">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
             {currentStepData?.title}
@@ -149,7 +149,7 @@ export default function Wizard({
       </div>
 
       {/* Navigation Buttons */}
-      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center flex-shrink-0">
         <div className="flex space-x-3">
           {onCancel && (
             <Button onClick={onCancel} variant="ghost" disabled={isLoading}>

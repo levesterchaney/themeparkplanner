@@ -60,6 +60,8 @@ services:
     depends_on:
       - api
     restart: always
+    environment:
+      API_INTERNAL_URL: http://api:8000
 
 volumes:
   pgdata:
