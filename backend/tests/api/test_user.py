@@ -76,15 +76,15 @@ class TestGetUserDetails:
             assert response.status_code == 200
             data = response.json()
 
-            assert data["firstName"] == "John"
-            assert data["lastName"] == "Doe"
+            assert data["first_name"] == "John"
+            assert data["last_name"] == "Doe"
             assert data["email"] == "test@example.com"
             assert data["avatar"] == "https://example.com/avatar.jpg"
-            assert data["preferences"]["defaultPartySize"] == 4
-            assert data["preferences"]["hasKids"] is True
-            assert data["preferences"]["thrillLevel"] == "high"
-            assert data["preferences"]["accessibilityNeeds"] == ["wheelchair"]
-            assert data["preferences"]["dietaryRestrictions"] == [
+            assert data["preferences"]["default_party_size"] == 4
+            assert data["preferences"]["has_kids"] is True
+            assert data["preferences"]["thrill_level"] == "high"
+            assert data["preferences"]["accessibility_needs"] == ["wheelchair"]
+            assert data["preferences"]["dietary_restrictions"] == [
                 "vegetarian",
                 "gluten_free",
             ]
@@ -149,12 +149,12 @@ class TestGetUserDetails:
             assert response.status_code == 200
             data = response.json()
 
-            assert data["firstName"] == "Jane"
-            assert data["lastName"] == "Smith"
+            assert data["first_name"] == "Jane"
+            assert data["last_name"] == "Smith"
             assert data["email"] == "test@example.com"
             assert data["avatar"] is None
-            assert data["preferences"]["defaultPartySize"] is None
-            assert data["preferences"]["hasKids"] is None
+            assert data["preferences"]["default_party_size"] is None
+            assert data["preferences"]["has_kids"] is None
 
         app.dependency_overrides.clear()
 
@@ -218,9 +218,9 @@ class TestUpdateUserDetails:
 
         async with AsyncClient(app=app, base_url="http://testserver") as client:
             update_data = {
-                "firstName": "Johnny",
-                "lastName": "Updated",
-                "avatarUrl": "https://example.com/new-avatar.jpg",
+                "first_name": "Johnny",
+                "last_name": "Updated",
+                "avatar_url": "https://example.com/new-avatar.jpg",
             }
 
             response = await client.patch("/api/v1/users/me", json=update_data)
@@ -248,9 +248,9 @@ class TestUpdateUserDetails:
 
         async with AsyncClient(app=app, base_url="http://testserver") as client:
             update_data = {
-                "firstName": "",  # Empty first name should fail validation
-                "lastName": "Doe",
-                "avatarUrl": "https://example.com/avatar.jpg",
+                "first_name": "",  # Empty first name should fail validation
+                "last_name": "Doe",
+                "avatar_url": "https://example.com/avatar.jpg",
             }
 
             response = await client.patch("/api/v1/users/me", json=update_data)
@@ -268,9 +268,9 @@ class TestUpdateUserDetails:
 
         async with AsyncClient(app=app, base_url="http://testserver") as client:
             update_data = {
-                "firstName": "John",
-                "lastName": "Doe",
-                "avatarUrl": "https://example.com/avatar.jpg",
+                "first_name": "John",
+                "last_name": "Doe",
+                "avatar_url": "https://example.com/avatar.jpg",
             }
 
             response = await client.patch("/api/v1/users/me", json=update_data)
@@ -340,11 +340,11 @@ class TestUpdateUserPreferences:
 
         async with AsyncClient(app=app, base_url="http://testserver") as client:
             update_data = {
-                "defaultPartySize": 4,
-                "hasKids": True,
-                "thrillLevel": "high",
-                "accessibilityNeeds": ["wheelchair", "hearing_impairment"],
-                "dietaryRestrictions": ["vegetarian"],
+                "default_party_size": 4,
+                "has_kids": True,
+                "thrill_level": "high",
+                "accessibility_needs": ["wheelchair", "hearing_impairment"],
+                "dietary_restrictions": ["vegetarian"],
             }
 
             response = await client.patch(
@@ -426,8 +426,8 @@ class TestUpdateUserPreferences:
         app.dependency_overrides[get_current_user] = override_get_current_user
 
         async with AsyncClient(app=app, base_url="http://testserver") as client:
-            # Only update hasKids, leave other fields unchanged
-            update_data = {"hasKids": True}
+            # Only update has_kids, leave other fields unchanged
+            update_data = {"has_kids": True}
 
             response = await client.patch(
                 "/api/v1/users/me/preferences", json=update_data
@@ -437,7 +437,7 @@ class TestUpdateUserPreferences:
             data = response.json()
             assert data["message"] == "User preferences updated successfully"
 
-            # Verify only hasKids was updated
+            # Verify only has_kids was updated
             assert user_preferences.has_kids is True
             # Other fields should remain unchanged
             assert user_preferences.default_party_size == 2
@@ -491,7 +491,7 @@ class TestUpdateUserPreferences:
         app.dependency_overrides[get_current_user] = override_get_current_user
 
         async with AsyncClient(app=app, base_url="http://testserver") as client:
-            update_data = {"defaultPartySize": 4, "hasKids": True}
+            update_data = {"default_party_size": 4, "has_kids": True}
 
             response = await client.patch(
                 "/api/v1/users/me/preferences", json=update_data
@@ -511,9 +511,9 @@ class TestUpdateUserPreferences:
 
         async with AsyncClient(app=app, base_url="http://testserver") as client:
             update_data = {
-                "defaultPartySize": 4,
-                "hasKids": True,
-                "thrillLevel": "high",
+                "default_party_size": 4,
+                "has_kids": True,
+                "thrill_level": "high",
             }
 
             response = await client.patch(
@@ -580,7 +580,7 @@ class TestUpdateUserPreferences:
 
         async with AsyncClient(app=app, base_url="http://testserver") as client:
             update_data = {
-                "thrillLevel": "invalid_level"  # This should trigger validation error
+                "thrill_level": "invalid_level"  # This should trigger validation error
             }
 
             # Mock the preference assignment for invalid thrill level
