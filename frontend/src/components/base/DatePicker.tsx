@@ -77,7 +77,7 @@ export default function DatePicker({
         onChange={handleNativeChange}
         disabled={isDisabled}
         required={isRequired}
-        aria-hidden="false"
+        tabIndex={-1}
         className="sr-only"
       />
 

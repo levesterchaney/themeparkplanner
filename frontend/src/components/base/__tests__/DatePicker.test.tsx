@@ -108,11 +108,12 @@ describe('DatePicker Component', () => {
     expect(screen.queryByRole('grid')).not.toBeInTheDocument();
   });
 
-  it('shows required attribute on hidden input when isRequired is true', () => {
+  it('shows required attribute on native input when isRequired is true', () => {
     render(<DatePicker {...defaultProps} isRequired={true} />);
-    const hiddenInput = screen.getByDisplayValue('');
-    expect(hiddenInput).toHaveAttribute('required');
-    expect(hiddenInput).toHaveAttribute('type', 'hidden');
+    const nativeInput = document.querySelector(
+      'input[type="date"]'
+    ) as HTMLElement;
+    expect(nativeInput).toHaveAttribute('required');
   });
 
   it('has proper accessibility attributes', () => {

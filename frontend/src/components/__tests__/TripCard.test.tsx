@@ -1,11 +1,24 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import TripCard from '../TripCard';
 
-const mockPush = jest.fn();
-jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
-}));
+jest.mock('next/link', () => {
+  const MockLink = ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  );
+  MockLink.displayName = 'MockLink';
+  return MockLink;
+});
 
 const baseProps = {
   id: 42,
@@ -15,8 +28,6 @@ const baseProps = {
 };
 
 describe('TripCard', () => {
-  beforeEach(() => jest.clearAllMocks());
-
   it('renders title and destination', () => {
     render(<TripCard {...baseProps} />);
     expect(screen.getByText('Disney Adventure')).toBeInTheDocument();
@@ -26,8 +37,8 @@ describe('TripCard', () => {
 
   it('navigates to trip detail on click', () => {
     render(<TripCard {...baseProps} />);
-    fireEvent.click(screen.getByText('View Details →'));
-    expect(mockPush).toHaveBeenCalledWith('/trips/42');
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', '/trips/42');
   });
 
   it('renders status badge when provided', () => {
