@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface TripCardProps {
   id: number;
@@ -21,16 +21,10 @@ export default function TripCard({
   partySize,
   hasKids,
 }: TripCardProps) {
-  const router = useRouter();
-
-  const handleViewTrip = () => {
-    router.push(`/trips/${id}`);
-  };
-
   return (
-    <div
-      className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border max-w-md hover:shadow-lg transition-shadow cursor-pointer"
-      onClick={handleViewTrip}
+    <Link
+      href={`/trips/${id}`}
+      className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border max-w-md hover:shadow-lg transition-shadow cursor-pointer no-underline"
     >
       {/* Card Image */}
       <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-600 rounded-tl-xl rounded-tr-xl relative">
@@ -77,6 +71,6 @@ export default function TripCard({
           </button>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

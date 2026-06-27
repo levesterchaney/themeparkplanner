@@ -184,6 +184,6 @@ jobs:
         curl -f http://localhost:3000 || exit 1
 
     - name: Run integration tests (if they exist)
+      working-directory: ./frontend
       run: |
-        echo "Integration tests would run here"
-        echo "Add end-to-end tests with Playwright or Cypress"
+        npx playwright test

@@ -56,9 +56,30 @@ export default function DatePicker({
 
   const displayValue = value ? format(value, 'MMM dd, yyyy') : '';
 
+  const nativeInputId = `${id}-native`;
+
+  const handleNativeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const parsed = e.target.value
+      ? new Date(e.target.value + 'T12:00:00')
+      : undefined;
+    handleChange(id, parsed);
+  };
+
   return (
     <div className="relative space-y-2">
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={nativeInputId}>{label}</label>
+
+      {/* Visually-hidden native date input for accessibility and testing */}
+      <input
+        id={nativeInputId}
+        type="date"
+        value={value ? format(value, 'yyyy-MM-dd') : ''}
+        onChange={handleNativeChange}
+        disabled={isDisabled}
+        required={isRequired}
+        aria-hidden="false"
+        className="sr-only"
+      />
 
       <button
         ref={buttonRef}
@@ -142,12 +163,8 @@ export default function DatePicker({
         </div>
       )}
 
-      <input
-        type="hidden"
-        name={id}
-        value={value ? value.toISOString() : ''}
-        required={isRequired}
-      />
+      {/* Hidden input to submit the value with the form */}
+      <input type="hidden" name={id} value={value ? value.toISOString() : ''} />
     </div>
   );
 }

@@ -2,12 +2,14 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Response, status
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.models import User, UserPreference
+from app.models.trips import Trip
+from app.models.users import PasswordResetToken, Session
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -118,3 +120,26 @@ async def update_user_preferences(
     await db.commit()
 
     return {"message": "User preferences updated successfully"}
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_account(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    uid = current_user.id
+    # Delete in FK dependency order: sessions, tokens, preferences, trips, then user
+    await db.execute(delete(Session).where(Session.user_id == uid))
+    await db.execute(
+        delete(PasswordResetToken).where(PasswordResetToken.user_id == uid)
+    )
+    await db.execute(delete(UserPreference).where(UserPreference.user_id == uid))
+    # Trips and their itineraries cascade via DB foreign keys
+    trips = await db.execute(select(Trip).where(Trip.user_id == uid))
+    for trip in trips.scalars().all():
+        await db.delete(trip)
+    await db.flush()
+    user = await db.get(User, uid)
+    if user:
+        await db.delete(user)
+    await db.commit()

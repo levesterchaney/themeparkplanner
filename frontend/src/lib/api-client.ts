@@ -34,10 +34,13 @@ class ApiClient {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
 
-        // Handle auth failures globally
+        // Handle auth failures globally — but not for auth endpoints themselves
+        // (login/register failures should be handled by the calling code, not redirected)
+        const isAuthEndpoint = endpoint.includes('/auth/');
         if (
           (response.status === 401 || response.status === 403) &&
-          globalAuthFailureHandler
+          globalAuthFailureHandler &&
+          !isAuthEndpoint
         ) {
           globalAuthFailureHandler();
           // Don't throw the error for auth failures as they're handled globally
