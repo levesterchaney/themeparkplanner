@@ -11,6 +11,10 @@ export { default as Numberbox } from './base/Numberbox';
 export { default as TabPanel } from './TabPanel';
 export { default as Textbox } from './base/Textbox';
 export { default as TripCard } from './TripCard';
+export { default as Wizard } from './base/Wizard';
+export type { WizardStep } from './base/Wizard';
+export { default as AttractionSelector } from './AttractionSelector';
+export { default as ItineraryPreferencesWizard } from './ItineraryPreferencesWizard';
 
 export { default as HealthCheck } from './HealthCheck';
 // Future component exports will go here:

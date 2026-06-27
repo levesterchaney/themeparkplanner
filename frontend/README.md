@@ -108,6 +108,7 @@ npm start
 ## 🎨 Design System
 
 ### Color Palette
+
 - **Primary**: Indigo (600, 700) - Authentication, CTAs
 - **Secondary**: Gray (50-900) - Text, backgrounds
 - **Success**: Green (600, 400) - Success states
@@ -115,11 +116,13 @@ npm start
 - **Warning**: Yellow (600, 400) - Warning states
 
 ### Typography
+
 - **Font**: Geist Sans - Modern, readable typeface
 - **Mono**: Geist Mono - Code and technical content
 - **Scales**: text-sm, text-base, text-lg, text-xl, text-2xl, text-3xl, text-4xl
 
 ### Components
+
 - **Forms**: Consistent styling with validation states
 - **Buttons**: Primary, secondary, and danger variants
 - **Cards**: Elevated containers with shadows
@@ -128,6 +131,7 @@ npm start
 ## 📱 Pages & Routes
 
 ### Public Routes
+
 - `/` - Landing page with system status
 - `/login` - User authentication
 - `/register` - User registration
@@ -137,12 +141,14 @@ npm start
 - `/trips` - Trip creation and planning interface
 
 ### Protected Routes (Future)
+
 - `/dashboard` - User dashboard
 - `/parks` - Theme park listings
 - `/trips` - Trip planning interface
 - `/profile` - User profile management
 
 ### Route Structure
+
 ```typescript
 // app/page.tsx - Homepage
 // app/login/page.tsx - Login page
@@ -157,6 +163,7 @@ npm start
 ### Core Components
 
 **Authentication Components**
+
 ```typescript
 // src/components/auth/RegistrationForm.tsx
 export default function RegistrationForm() {
@@ -180,6 +187,7 @@ export default function ResetPasswordForm() {
 ```
 
 **System Components**
+
 ```typescript
 // src/components/HealthCheck.tsx
 export default function HealthCheck() {
@@ -188,6 +196,7 @@ export default function HealthCheck() {
 ```
 
 ### Component Patterns
+
 - **Form Handling**: Controlled components with validation
 - **Error Boundaries**: Graceful error handling
 - **Loading States**: Skeleton screens and spinners
@@ -211,6 +220,7 @@ export const apiClient = new ApiClient();
 ```
 
 ### Authentication Service
+
 ```typescript
 // src/services/auth.ts
 export const authService = {
@@ -231,12 +241,16 @@ export const authService = {
   },
 
   resetPassword: async (token: string, newPassword: string) => {
-    return apiClient.post('/api/v1/auth/reset-password', { token, newPassword });
-  }
+    return apiClient.post('/api/v1/auth/reset-password', {
+      token,
+      newPassword,
+    });
+  },
 };
 ```
 
 ### Type Definitions
+
 ```typescript
 // src/types/api.ts
 export interface RegistrationRequestData {
@@ -303,6 +317,7 @@ src/__tests__/
 ### Testing Patterns
 
 **Component Testing**
+
 ```typescript
 import { render, screen, fireEvent } from '@testing-library/react';
 import RegistrationForm from '@/components/auth/RegistrationForm';
@@ -320,6 +335,7 @@ describe('RegistrationForm', () => {
 ```
 
 **Service Testing**
+
 ```typescript
 import { authService } from '@/services/auth';
 
@@ -329,12 +345,16 @@ describe('AuthService', () => {
 
     await authService.register(userData);
 
-    expect(mockApiClient.post).toHaveBeenCalledWith('/api/v1/auth/register', userData);
+    expect(mockApiClient.post).toHaveBeenCalledWith(
+      '/api/v1/auth/register',
+      userData
+    );
   });
 });
 ```
 
 ### Coverage Reports
+
 - **Terminal**: Summary with missing coverage
 - **HTML**: `coverage/lcov-report/index.html` - Detailed report
 - **LCOV**: `coverage/lcov.info` - CI/CD integration
@@ -342,6 +362,7 @@ describe('AuthService', () => {
 ## 🎯 Performance Optimization
 
 ### Next.js Optimizations
+
 - **App Router**: Latest routing with streaming
 - **Static Generation**: Pre-built pages for better performance
 - **Image Optimization**: Next.js automatic image optimization
@@ -349,6 +370,7 @@ describe('AuthService', () => {
 - **Bundle Analysis**: Built-in bundle analyzer
 
 ### Performance Metrics
+
 ```bash
 # Analyze bundle size
 npm run build && npx @next/bundle-analyzer
@@ -359,6 +381,7 @@ npm run build && npm start
 ```
 
 ### Code Splitting
+
 ```typescript
 // Dynamic imports for code splitting
 const DynamicComponent = dynamic(() => import('./HeavyComponent'), {
@@ -369,6 +392,7 @@ const DynamicComponent = dynamic(() => import('./HeavyComponent'), {
 ## 🔧 Development Tools
 
 ### Code Quality
+
 ```bash
 # Linting
 npm run lint
@@ -381,6 +405,7 @@ npx tsc --noEmit
 ```
 
 ### Development Server
+
 ```bash
 # Development with debugging
 DEBUG=true npm run dev
@@ -395,6 +420,7 @@ npm run dev --https
 ## 🌐 Deployment
 
 ### Vercel Deployment (Recommended)
+
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -406,6 +432,7 @@ vercel --prod
 ```
 
 ### Docker Deployment
+
 ```bash
 # Build image
 docker build -t themeparkplanner-ui .
@@ -415,6 +442,7 @@ docker run -p 3000:3000 themeparkplanner-ui
 ```
 
 ### Static Export
+
 ```bash
 # Generate static export
 npm run build
@@ -428,11 +456,11 @@ npx serve out
 
 ### Environment Variables
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `NEXT_PUBLIC_API_BASE_URL` | Backend API URL | `http://localhost:8000` | ✅ |
-| `NEXT_PUBLIC_DEBUG` | Enable debug features | `false` | ❌ |
-| `PORT` | Development server port | `3000` | ❌ |
+| Variable                   | Description             | Default                 | Required |
+| -------------------------- | ----------------------- | ----------------------- | -------- |
+| `NEXT_PUBLIC_API_BASE_URL` | Backend API URL         | `http://localhost:8000` | ✅       |
+| `NEXT_PUBLIC_DEBUG`        | Enable debug features   | `false`                 | ❌       |
+| `PORT`                     | Development server port | `3000`                  | ❌       |
 
 ### Next.js Configuration
 
@@ -475,6 +503,7 @@ module.exports = nextConfig;
 ### Tailwind CSS Classes
 
 **Layout**
+
 ```css
 .container      /* Responsive container */
 .mx-auto        /* Center horizontally */
@@ -484,6 +513,7 @@ module.exports = nextConfig;
 ```
 
 **Spacing**
+
 ```css
 .p-4           /* Padding: 1rem */
 .m-8           /* Margin: 2rem */
@@ -491,6 +521,7 @@ module.exports = nextConfig;
 ```
 
 **Colors**
+
 ```css
 .bg-indigo-600    /* Primary background */
 .text-gray-900    /* Primary text */
@@ -498,6 +529,7 @@ module.exports = nextConfig;
 ```
 
 ### Dark Mode Support
+
 ```typescript
 // Automatic dark mode based on system preference
 <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
@@ -508,29 +540,32 @@ module.exports = nextConfig;
 ## 🔒 Security
 
 ### Authentication Flow
+
 1. **Registration**: Secure form with validation
 2. **Session Management**: HTTP-only cookies
 3. **Route Protection**: Middleware-based auth checks
 4. **CSRF Protection**: Built-in Next.js protection
 
 ### Security Headers
+
 ```typescript
 // next.config.js
 const securityHeaders = [
   {
     key: 'X-Frame-Options',
-    value: 'DENY'
+    value: 'DENY',
   },
   {
     key: 'X-Content-Type-Options',
-    value: 'nosniff'
-  }
+    value: 'nosniff',
+  },
 ];
 ```
 
 ## 📊 Monitoring
 
 ### Error Tracking
+
 ```typescript
 // Error boundary for graceful error handling
 class ErrorBoundary extends React.Component {
@@ -541,6 +576,7 @@ class ErrorBoundary extends React.Component {
 ```
 
 ### Performance Monitoring
+
 - **Core Web Vitals**: Built-in Next.js monitoring
 - **Custom Analytics**: Google Analytics integration ready
 - **Real User Monitoring**: Performance API usage
@@ -548,7 +584,9 @@ class ErrorBoundary extends React.Component {
 ## 🤝 Contributing
 
 ### Development Workflow
+
 1. **Setup Environment**
+
    ```bash
    npm install
    cp .env.example .env.local
@@ -556,6 +594,7 @@ class ErrorBoundary extends React.Component {
    ```
 
 2. **Create Feature Branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -567,6 +606,7 @@ class ErrorBoundary extends React.Component {
    - Use semantic commit messages
 
 4. **Quality Checks**
+
    ```bash
    npm run lint        # Code linting
    npm run test        # Unit tests
@@ -579,6 +619,7 @@ class ErrorBoundary extends React.Component {
    - Update documentation if needed
 
 ### Code Standards
+
 - **TypeScript**: Strict mode with proper typing
 - **Components**: Functional components with hooks
 - **Styling**: Tailwind classes, avoid inline styles
@@ -588,6 +629,7 @@ class ErrorBoundary extends React.Component {
 ## 📝 Examples
 
 ### Form Component
+
 ```typescript
 'use client';
 
@@ -633,6 +675,7 @@ export default function ExampleForm() {
 ```
 
 ### API Service
+
 ```typescript
 import { apiClient } from '@/lib/api-client';
 
@@ -643,7 +686,7 @@ export const exampleService = {
 
   async createData(data: CreateDataRequest) {
     return apiClient.post<DataResponse>('/api/v1/data', data);
-  }
+  },
 };
 ```
 
@@ -652,6 +695,7 @@ export const exampleService = {
 ### Common Issues
 
 **Build Errors**
+
 ```bash
 # Clear Next.js cache
 rm -rf .next
@@ -662,6 +706,7 @@ npm install
 ```
 
 **TypeScript Errors**
+
 ```bash
 # Check TypeScript config
 npx tsc --showConfig
@@ -671,6 +716,7 @@ npx tsc --noEmit
 ```
 
 **API Connection Issues**
+
 ```bash
 # Verify backend is running
 curl http://localhost:8000/api/v1/health
@@ -680,6 +726,7 @@ echo $NEXT_PUBLIC_API_BASE_URL
 ```
 
 ### Debug Mode
+
 ```bash
 # Enable detailed logging
 DEBUG=true npm run dev
@@ -691,12 +738,14 @@ DEBUG=true npm run dev
 ## 📈 Performance Metrics
 
 ### Key Metrics to Monitor
+
 - **First Contentful Paint (FCP)**: < 1.8s
 - **Largest Contentful Paint (LCP)**: < 2.5s
 - **Cumulative Layout Shift (CLS)**: < 0.1
 - **First Input Delay (FID)**: < 100ms
 
 ### Optimization Techniques
+
 - Image optimization with `next/image`
 - Font optimization with `next/font`
 - Code splitting with dynamic imports
@@ -705,6 +754,7 @@ DEBUG=true npm run dev
 ## 🎯 Roadmap
 
 ### Current Features ✅
+
 - Complete user authentication system (login, register, logout)
 - Password reset flow with email integration
 - Responsive design with Tailwind CSS
@@ -715,6 +765,7 @@ DEBUG=true npm run dev
 - Loading states and user feedback
 
 ### In Development 🚧
+
 - User dashboard interface
 - Theme park data integration
 - Trip planning components
@@ -722,6 +773,7 @@ DEBUG=true npm run dev
 - Advanced form validation
 
 ### Future Enhancements 💡
+
 - Progressive Web App (PWA)
 - Offline functionality
 - Push notifications

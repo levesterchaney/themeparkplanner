@@ -1,4 +1,4 @@
-import { NewTripRequestData } from '@/types/api';
+import { NewTripRequestData, UpdateTripRequestData } from '@/types/api';
 import { apiClient } from '@/lib';
 
 export interface TripDetailResponseData {
@@ -34,5 +34,14 @@ export const tripService = {
   },
   getSpecificTrip: async (tripId: string): Promise<TripDetailResponseData> => {
     return apiClient.get(`/api/v1/trips/${tripId}`);
+  },
+  updateTrip: async (
+    tripId: string,
+    data: UpdateTripRequestData
+  ): Promise<{ message: string }> => {
+    return apiClient.patch(`/api/v1/trips/${tripId}`, data);
+  },
+  deleteTrip: async (tripId: string): Promise<{ message: string }> => {
+    return apiClient.delete(`/api/v1/trips/${tripId}`);
   },
 };

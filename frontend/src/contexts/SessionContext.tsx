@@ -25,44 +25,19 @@ export function SessionProvider({
   const [isAuthenticated, setIsAuthenticated] = useState(initialAuth);
 
   const checkSession = async () => {
-    // Check if session cookie exists first
-    const hasSessionCookie = document.cookie
-      .split(';')
-      .some((cookie) => cookie.trim().startsWith('session_token='));
-
-    if (!hasSessionCookie) {
-      setIsAuthenticated(false);
-      return;
-    }
-
-    // Validate the session with the backend
     try {
       await authService.validateSession();
       setIsAuthenticated(true);
     } catch {
-      // Session is invalid or network error, clear it
       setIsAuthenticated(false);
-      document.cookie =
-        'session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     }
   };
 
   const handleAuthFailure = () => {
-    // Clear session state and redirect to login
     setIsAuthenticated(false);
-    // Clear the session cookie by setting it to expire
-    document.cookie =
-      'session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    // Redirect to login page
     window.location.href = '/login';
   };
 
-  // Check session on mount and when cookies change
-  useEffect(() => {
-    checkSession();
-  }, []);
-
-  // Register the auth failure handler globally
   useEffect(() => {
     setGlobalAuthHandler(handleAuthFailure);
   }, []);

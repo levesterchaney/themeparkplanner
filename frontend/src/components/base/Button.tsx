@@ -7,6 +7,7 @@ interface ButtonProps {
   disabled?: boolean;
   variant?: 'primary' | 'secondary' | 'destructive' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
 export default function Button({
@@ -16,6 +17,7 @@ export default function Button({
   disabled = false,
   variant = 'primary',
   size = 'md',
+  className,
 }: ButtonProps) {
   const baseStyles =
     'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
@@ -37,14 +39,15 @@ export default function Button({
     lg: 'h-10 px-6 py-2',
   };
 
-  const className = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]}`;
+  const finalClassName =
+    `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className || ''}`.trim();
 
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={className}
+      className={finalClassName}
     >
       {children}
     </button>

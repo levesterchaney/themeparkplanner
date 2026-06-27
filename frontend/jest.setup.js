@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
@@ -10,15 +10,15 @@ jest.mock('next/navigation', () => ({
       back: jest.fn(),
       forward: jest.fn(),
       refresh: jest.fn(),
-    }
+    };
   },
   useSearchParams() {
-    return new URLSearchParams()
+    return new URLSearchParams();
   },
   usePathname() {
-    return ''
+    return '';
   },
-}))
+}));
 
 // Mock Next.js cookies
 jest.mock('next/headers', () => ({
@@ -26,9 +26,9 @@ jest.mock('next/headers', () => ({
     return {
       has: jest.fn(() => false),
       get: jest.fn(() => undefined),
-    }
+    };
   },
-}))
+}));
 
 // Global test environment setup
-global.fetch = jest.fn()
+global.fetch = jest.fn();
