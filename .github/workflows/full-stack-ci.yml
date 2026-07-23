@@ -168,6 +168,9 @@ jobs:
         python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
         sleep 10
 
+    - name: Seed E2E fixture data
+      run: curl -sf -X POST http://localhost:8000/api/v1/parks/seed-test-data
+
     - name: Build frontend
       working-directory: ./frontend
       run: npm run build

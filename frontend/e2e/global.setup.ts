@@ -6,6 +6,11 @@ import * as path from 'path';
 const AUTH_FILE = 'e2e/.auth/user.json';
 
 setup('seed test user and authenticate', async ({ page, request }) => {
+  // Seed fixture destinations/attractions (idempotent, no-op if already seeded).
+  // Without this, pages like "new trip" have no destinations to select and
+  // dependent tests time out.
+  await request.post(`${API_URL}/parks/seed-test-data`);
+
   // Register test user (ignore 422 if already exists)
   await request.post(`${API_URL}/auth/register`, {
     data: {

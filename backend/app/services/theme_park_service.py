@@ -314,3 +314,92 @@ async def sync_park_data(park_id=None):
         await client.sync_individual_theme_park_data(park_id)
     else:
         await client.sync_all_theme_park_data()
+
+
+# Deterministic fixture data for e2e/integration tests. Avoids depending on
+# the live themeparks.wiki API being reachable or returning stable data
+# from CI.
+FIXTURE_PARKS = [
+    {
+        "external_id": "e2e-fixture-magic-kingdom",
+        "name": "Magic Kingdom",
+        "slug": "magic-kingdom",
+        "resort_name": "Walt Disney World",
+        "timezone": "America/New_York",
+        "attractions": [
+            {
+                "external_id": "e2e-fixture-space-mountain",
+                "name": "Space Mountain",
+                "type": "ATTRACTION",
+            },
+            {
+                "external_id": "e2e-fixture-pirates",
+                "name": "Pirates of the Caribbean",
+                "type": "ATTRACTION",
+            },
+        ],
+    },
+    {
+        "external_id": "e2e-fixture-disneyland-park",
+        "name": "Disneyland Park",
+        "slug": "disneyland-park",
+        "resort_name": "Disneyland Resort",
+        "timezone": "America/Los_Angeles",
+        "attractions": [
+            {
+                "external_id": "e2e-fixture-matterhorn",
+                "name": "Matterhorn Bobsleds",
+                "type": "ATTRACTION",
+            },
+        ],
+    },
+]
+
+
+async def seed_fixture_park_data():
+    """
+    Insert deterministic park/attraction fixtures for e2e and integration
+    tests. Idempotent: existing fixture rows (matched by external_id) are
+    left as-is, so it's safe to call on every test run.
+    """
+    async with AsyncSessionLocal() as db:
+        for park_fixture in FIXTURE_PARKS:
+            result = await db.execute(
+                select(Park).where(Park.external_id == park_fixture["external_id"])
+            )
+            park = result.scalar_one_or_none()
+
+            if not park:
+                park = Park(
+                    external_id=park_fixture["external_id"],
+                    name=park_fixture["name"],
+                    slug=park_fixture["slug"],
+                    resort_name=park_fixture["resort_name"],
+                    timezone=park_fixture["timezone"],
+                    synced_at=datetime.now(timezone.utc),
+                )
+                db.add(park)
+                await db.flush()
+
+            for attraction_fixture in park_fixture["attractions"]:
+                attraction_result = await db.execute(
+                    select(Attraction).where(
+                        Attraction.external_id == attraction_fixture["external_id"]
+                    )
+                )
+                if not attraction_result.scalar_one_or_none():
+                    db.add(
+                        Attraction(
+                            park_id=park.id,
+                            external_id=attraction_fixture["external_id"],
+                            name=attraction_fixture["name"],
+                            type=attraction_fixture["type"],
+                            synced_at=datetime.now(timezone.utc),
+                        )
+                    )
+
+        await db.commit()
+
+    # Clear the cached (possibly empty) parks list so freshly seeded data
+    # is visible immediately instead of waiting out the 1 hour TTL.
+    await cache_service.delete(cache_service.generate_parks_list_key())

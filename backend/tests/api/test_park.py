@@ -427,6 +427,40 @@ class TestParksAPI:
         app.dependency_overrides.clear()
 
     @pytest.mark.asyncio
+    async def test_seed_test_data_success(self):
+        """Test seeding fixture park data for e2e/integration tests."""
+        with (
+            patch("app.api.park.seed_fixture_park_data") as mock_seed,
+            patch("app.api.park.settings") as mock_settings,
+        ):
+            mock_settings.environment = "development"
+            mock_seed.return_value = None
+
+            async with AsyncClient(app=app, base_url="http://testserver") as client:
+                response = await client.post("/api/v1/parks/seed-test-data")
+
+                assert response.status_code == 200
+                data = response.json()
+                assert "seeded successfully" in data["message"]
+
+                mock_seed.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_seed_test_data_blocked_in_production(self):
+        """Test seeding endpoint is disabled when running in production."""
+        with (
+            patch("app.api.park.seed_fixture_park_data") as mock_seed,
+            patch("app.api.park.settings") as mock_settings,
+        ):
+            mock_settings.environment = "production"
+
+            async with AsyncClient(app=app, base_url="http://testserver") as client:
+                response = await client.post("/api/v1/parks/seed-test-data")
+
+                assert response.status_code == 404
+                mock_seed.assert_not_called()
+
+    @pytest.mark.asyncio
     async def test_parks_endpoints_require_authentication(self):
         """Test that parks endpoints require authentication."""
 
