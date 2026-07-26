@@ -3,7 +3,11 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.theme_park_service import ThemeParkClient, sync_park_data
+from app.services.theme_park_service import (
+    ThemeParkClient,
+    seed_fixture_park_data,
+    sync_park_data,
+)
 
 
 class TestThemeParkClient:
@@ -360,3 +364,64 @@ class TestSyncParkDataFunction:
         with patch.object(ThemeParkClient, "sync_all_theme_park_data") as mock_sync:
             await sync_park_data(park_id=None)
             mock_sync.assert_called_once()
+
+
+class TestSeedFixtureParkData:
+    """Test the seed_fixture_park_data function."""
+
+    @pytest.mark.asyncio
+    async def test_seed_fixture_park_data_creates_new_rows(self):
+        """Test that fixture parks and attractions are created when absent."""
+        with patch(
+            "app.services.theme_park_service.AsyncSessionLocal"
+        ) as mock_session_local:
+            with patch("app.services.theme_park_service.cache_service") as mock_cache:
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session_context = AsyncMock()
+                mock_session_context.__aenter__.return_value = mock_session
+                mock_session_local.return_value = mock_session_context
+
+                def mock_execute(query):
+                    mock_result = Mock()
+                    mock_result.scalar_one_or_none.return_value = None
+                    return mock_result
+
+                mock_session.execute.side_effect = mock_execute
+                mock_cache.delete = AsyncMock()
+
+                await seed_fixture_park_data()
+
+                # 2 fixture parks + 3 fixture attractions == 5 new rows added
+                assert mock_session.add.call_count == 5
+                mock_session.commit.assert_called_once()
+                mock_cache.delete.assert_called_once_with(
+                    mock_cache.generate_parks_list_key.return_value
+                )
+
+    @pytest.mark.asyncio
+    async def test_seed_fixture_park_data_is_idempotent(self):
+        """Test that already-seeded parks/attractions are not duplicated."""
+        with patch(
+            "app.services.theme_park_service.AsyncSessionLocal"
+        ) as mock_session_local:
+            with patch("app.services.theme_park_service.cache_service") as mock_cache:
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session_context = AsyncMock()
+                mock_session_context.__aenter__.return_value = mock_session
+                mock_session_local.return_value = mock_session_context
+
+                existing_park = Mock()
+                existing_park.id = 1
+
+                def mock_execute(query):
+                    mock_result = Mock()
+                    mock_result.scalar_one_or_none.return_value = existing_park
+                    return mock_result
+
+                mock_session.execute.side_effect = mock_execute
+                mock_cache.delete = AsyncMock()
+
+                await seed_fixture_park_data()
+
+                mock_session.add.assert_not_called()
+                mock_session.commit.assert_called_once()

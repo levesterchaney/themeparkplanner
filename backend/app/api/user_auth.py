@@ -20,8 +20,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 class UserRegistrationData(BaseModel):
     email: str
     password: str
-    firstName: Optional[str] = None
-    lastName: Optional[str] = None
+    first_name: str
+    last_name: Optional[str] = None
 
 
 class UserLoginData(BaseModel):
@@ -87,10 +87,9 @@ async def register_user(
             email=registration_data.email,
             password_hash=hashed_pass.decode("utf-8"),
         )
-        if registration_data.firstName:
-            new_user.first_name = registration_data.firstName
-        if registration_data.lastName:
-            new_user.last_name = registration_data.lastName
+        new_user.first_name = registration_data.first_name
+        if registration_data.last_name:
+            new_user.last_name = registration_data.last_name
         db.add(new_user)
         await db.flush()  # Ensure new_user.id is populated
 

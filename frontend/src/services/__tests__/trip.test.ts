@@ -9,6 +9,14 @@ jest.mock('@/lib', () => ({
   },
 }));
 
+// getUpcomingTrips/getPastTrips filter against the current date, so fixtures
+// must stay relative to "now" rather than hardcoded to a specific year.
+const futureDateString = (daysFromNow: number): string => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromNow);
+  return date.toISOString().split('T')[0];
+};
+
 describe('tripService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -79,8 +87,8 @@ describe('tripService', () => {
           id: 1,
           title: 'Disney Adventure',
           destination: 'Walt Disney World Resort',
-          start_date: '2026-07-01',
-          end_date: '2026-07-05',
+          start_date: futureDateString(5),
+          end_date: futureDateString(9),
           party_size: 4,
           has_kids: true,
           status: 'planned',
@@ -89,8 +97,8 @@ describe('tripService', () => {
           id: 2,
           title: 'Universal Fun',
           destination: 'Universal Orlando Resort',
-          start_date: '2026-08-01',
-          end_date: '2026-08-03',
+          start_date: futureDateString(36),
+          end_date: futureDateString(38),
           party_size: 2,
           has_kids: false,
           status: 'draft',

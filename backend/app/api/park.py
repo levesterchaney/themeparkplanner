@@ -5,10 +5,12 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.models import Attraction, Park, User
 from app.services.cache_service import cache_service
+from app.services.theme_park_service import seed_fixture_park_data
 from app.services.theme_park_service import sync_park_data as sync_park_data_service
 
 router = APIRouter(prefix="/parks", tags=["parks"])
@@ -172,3 +174,20 @@ async def sync_park_data(
         await sync_park_data_service()
 
     return {"message": "Park data synchronization completed successfully."}
+
+
+@router.post("/seed-test-data", status_code=status.HTTP_200_OK)
+async def seed_test_data(response: Response):
+    """
+    Seed deterministic fixture park/attraction data for local development
+    and CI integration tests, so pages that list destinations have data to
+    render without depending on the live themeparks.wiki API. Disabled in
+    production.
+    """
+    if settings.environment == "production":
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"message": "Not found"}
+
+    await seed_fixture_park_data()
+
+    return {"message": "Fixture park data seeded successfully."}

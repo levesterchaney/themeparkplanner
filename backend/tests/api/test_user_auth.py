@@ -13,8 +13,8 @@ class TestUserRegistration:
         user_data = {
             "email": "test@example.com",
             "password": "TestPassword123",
-            "firstName": "Test",
-            "lastName": "User",
+            "first_name": "Test",
+            "last_name": "User",
         }
 
         response = await client.post("/api/v1/auth/register", json=user_data)
@@ -46,7 +46,7 @@ class TestUserRegistration:
             user_data = {
                 "email": "duplicate@example.com",
                 "password": "TestPassword123",
-                "firstName": "Test",
+                "first_name": "Test",
             }
 
             response = await client.post("/api/v1/auth/register", json=user_data)
@@ -64,7 +64,7 @@ class TestUserRegistration:
         user_data = {
             "email": "weak@example.com",
             "password": "123",  # Too short
-            "firstName": "Test",
+            "first_name": "Test",
         }
 
         response = await client.post("/api/v1/auth/register", json=user_data)

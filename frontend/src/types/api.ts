@@ -22,7 +22,7 @@ export interface HealthStatus {
 export interface RegistrationRequestData {
   email: string;
   password: string;
-  first_name?: string;
+  first_name: string;
   last_name?: string;
 }
 
